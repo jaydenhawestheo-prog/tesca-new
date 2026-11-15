@@ -12,23 +12,21 @@ with open(os.path.join(BASE_DIR, "index.json"), "r", encoding="utf-8") as f:
     documents = data["documents"]
     inverted_index = data["inverted_index"]
 
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "YOUR_GOOGLE_CLIENT_://googleusercontent.com")
-
 HTML_PAGE = """
 <!DOCTYPE html>
 <html>
 <head>
     <title>Tesca Search</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://google.com" async defer></script>
     <style>
         body { font-family: Arial, sans-serif; max-width: 750px; margin: 40px auto; padding: 0 20px; background: #f9f9fb; color: #222; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         h1 { color: #1a73e8; margin: 0; }
         #user-badge { font-size: 14px; color: #1a73e8; font-weight: bold; }
+        .oneclick-btn { padding: 8px 14px; font-size: 14px; background: #fff; color: #1a73e8; border: 1px solid #1a73e8; border-radius: 20px; cursor: pointer; }
         form { display: flex; gap: 10px; margin-bottom: 25px; }
         input { flex: 1; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 6px; }
-        button { padding: 12px 24px; font-size: 16px; background: #1a73e8; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        button[type="submit"] { padding: 12px 24px; font-size: 16px; background: #1a73e8; color: white; border: none; border-radius: 6px; cursor: pointer; }
         .fusion { background: #e8f0fe; padding: 15px; border-radius: 8px; margin-bottom: 25px; line-height: 1.5; }
         .result { background: white; padding: 15px; border-radius: 8px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
         .result a { color: #1a0dab; font-size: 18px; text-decoration: none; word-break: break-all; }
@@ -39,8 +37,8 @@ HTML_PAGE = """
     <div class="header">
         <h1>Tesca Search</h1>
         <div>
-            <div id="user-badge"></div>
-            <div id="google-btn"></div>
+            <span id="user-badge"></span>
+            <button id="login-btn" class="oneclick-btn" onclick="oneClickSignIn()">1-Click Sign In (No Password)</button>
         </div>
     </div>
 
@@ -64,36 +62,20 @@ HTML_PAGE = """
     {% endif %}
 
     <script>
-        function handleCredentialResponse(response) {
-            const payload = JSON.parse(atob(response.credential.split('.')[1]));
-            localStorage.setItem("tesca_user", payload.name);
-            showUser(payload.name);
+        function oneClickSignIn() {
+            const name = prompt("Enter your display name (saved automatically, no password needed):") || "Guest";
+            localStorage.setItem("tesca_user", name);
+            showUser(name);
         }
 
         function showUser(name) {
             document.getElementById("user-badge").textContent = "Signed in: " + name;
-            document.getElementById("google-btn").style.display = "none";
+            document.getElementById("login-btn").style.display = "none";
         }
 
         window.onload = function () {
-            const savedUser = localStorage.getItem("tesca_user");
-            if (savedUser) {
-                showUser(savedUser);
-                return;
-            }
-
-            google.accounts.id.initialize({
-                client_id: "{{ client_id }}",
-                callback: handleCredentialResponse,
-                auto_select: true
-            });
-
-            google.accounts.id.renderButton(
-                document.getElementById("google-btn"),
-                { theme: "outline", size: "medium" }
-            );
-
-            google.accounts.id.prompt();
+            const saved = localStorage.getItem("tesca_user");
+            if (saved) showUser(saved);
         };
     </script>
 </body>
@@ -125,9 +107,8 @@ def home():
             results.append({"url": doc["url"], "snippet": doc["text"][:250]})
             if len(fusion) < 800:
                 fusion += doc["text"][:250] + " "
-    return render_template_string(HTML_PAGE, query=query, results=results, fusion=fusion, client_id=GOOGLE_CLIENT_ID)
+    return render_template_string(HTML_PAGE, query=query, results=results, fusion=fusion)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
