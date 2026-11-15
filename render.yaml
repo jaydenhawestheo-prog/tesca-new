@@ -1,0 +1,10 @@
+﻿services:
+  - type: web
+    name: tesca-new
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: GOOGLE_CLIENT_ID
+        sync: false
