@@ -1,4 +1,4 @@
-﻿import json
+import json
 import os
 import re
 from bs4 import BeautifulSoup
@@ -25,7 +25,7 @@ def crawl_page(url, depth=1, visited=None):
     try:
         res = requests.get(url, timeout=15, headers={"User-Agent": "TescaBot/1.0"})
         res.raise_for_status()
-        soup = BeautifulSoup(res.text, "html.parser")
+        soup = BeautifulSoup(res.content, "html.parser")  # bytes: lets bs4 detect the charset
         text = soup.get_text(separator=" ", strip=True)
         add_document(url, text)
         print(f"Indexed: {url}")
