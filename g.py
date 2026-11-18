@@ -17,7 +17,7 @@ canvas{touch-action:none;background:radial-gradient(circle at 50% 40%,#0f1e45 0%
 .box ul{padding-left:18px}
 .tip{font-size:.8rem;color:#94a3b8;text-align:center;margin-bottom:12px}
 .go{display:block;width:100%;background:linear-gradient(90deg,#0044cc,#00b4ff);color:#fff;border:none;padding:12px;border-radius:24px;font-size:1.05rem;font-weight:700;cursor:pointer}
-.mctrls{display:none;gap:14px;margin-top:12px;width:95vw;max-width:460px;justify-content:space-between}.mbtn{flex:1;background:#16203c;color:#7dd3fc;border:2px solid #00b4ff;padding:14px 0;border-radius:18px;font-size:1.25rem;font-weight:700;user-select:none;-webkit-user-select:none;touch-action:none}@media(max-width:820px),(pointer:coarse){.mctrls{display:flex}}</style></head><body>
+.mctrls{display:none;gap:14px;margin-top:12px;width:95vw;max-width:460px;justify-content:space-between}.mbtn{flex:1;background:#16203c;color:#7dd3fc;border:2px solid #00b4ff;padding:14px 0;border-radius:18px;font-size:1.25rem;font-weight:700;user-select:none;-webkit-user-select:none;touch-action:none}@media(max-width:820px),(pointer:coarse){.mctrls{display:flex}}@media(orientation:landscape) and (max-height:500px){body{justify-content:flex-start!important;padding-top:46px!important;overflow-y:auto!important}.bar{padding:6px 16px!important}canvas{margin-top:4px!important;max-height:66vh!important;width:auto!important}.mctrls{margin-top:6px!important}.mbtn{padding:8px 0!important;font-size:1rem!important}}</style></head><body>
 <div class="bar"><a href="/" class="brand">Tesca Space</a><div class="hud"><span>Score: <strong id="sc">0</strong></span><span>Best: <strong id="hi">0</strong></span><span>Lives: <strong id="lv">3</strong></span><span id="bdg" style="color:#38bdf8"></span></div>
 <div class="btns"><button type="button" class="hbtn" onclick="showHelp()">How to Play</button><a href="/" class="bbtn">Back to Wiki</a></div></div>
 <canvas id="cv" width="760" height="500" tabindex="0"></canvas><div class="mctrls"><button type="button" class="mbtn" id="mLeft">&#9664; Left</button><button type="button" class="mbtn" id="mFire" style="background:linear-gradient(135deg,#0044cc,#00b4ff);color:#fff">FIRE</button><button type="button" class="mbtn" id="mRight">Right &#9654;</button></div>
@@ -92,4 +92,5 @@ cv.addEventListener("touchstart", moveShipToTouch, { passive: false });
 cv.addEventListener("touchmove", moveShipToTouch, { passive: false });
 cv.addEventListener("touchend", () => { keys["Space"] = false; });
 </script></body></html>"""
+
 
