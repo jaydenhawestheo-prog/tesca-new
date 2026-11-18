@@ -1,4 +1,4 @@
-GAME_HTML = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+﻿GAME_HTML = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Tesca Space</title><style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#050914;color:#e2e8f0;font-family:"Segoe UI",Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;overflow:hidden}
@@ -8,7 +8,7 @@ body{background:#050914;color:#e2e8f0;font-family:"Segoe UI",Arial,sans-serif;di
 .btns{display:flex;gap:10px}
 .hbtn{background:#16203c;color:#7dd3fc;border:1px solid #00b4ff;padding:7px 14px;border-radius:18px;font-size:.88rem;font-weight:600;cursor:pointer}
 .bbtn{background:#0044cc;color:#fff;padding:7px 16px;border-radius:18px;text-decoration:none;font-size:.88rem;font-weight:600}
-canvas{background:radial-gradient(circle at 50% 40%,#0f1e45 0%,#040711 100%);border:2px solid #00b4ff;border-radius:14px;margin-top:54px;max-width:95vw;box-shadow:0 0 30px rgba(0,180,255,.25)}
+canvas{touch-action:none;background:radial-gradient(circle at 50% 40%,#0f1e45 0%,#040711 100%);border:2px solid #00b4ff;border-radius:14px;margin-top:54px;max-width:95vw;box-shadow:0 0 30px rgba(0,180,255,.25)}
 #ov{position:absolute;max-width:460px;width:92%;background:rgba(11,19,43,.97);padding:22px 26px;border-radius:16px;border:2px solid #00b4ff;z-index:20;box-shadow:0 16px 40px rgba(0,0,0,.7)}
 #ov h1{color:#00b4ff;font-size:1.6rem;text-align:center;margin-bottom:2px}
 #sub{text-align:center;color:#bae6fd;font-weight:600;margin-bottom:12px}
@@ -17,10 +17,10 @@ canvas{background:radial-gradient(circle at 50% 40%,#0f1e45 0%,#040711 100%);bor
 .box ul{padding-left:18px}
 .tip{font-size:.8rem;color:#94a3b8;text-align:center;margin-bottom:12px}
 .go{display:block;width:100%;background:linear-gradient(90deg,#0044cc,#00b4ff);color:#fff;border:none;padding:12px;border-radius:24px;font-size:1.05rem;font-weight:700;cursor:pointer}
-</style></head><body>
+.mctrls{display:none;gap:14px;margin-top:12px;width:95vw;max-width:460px;justify-content:space-between}.mbtn{flex:1;background:#16203c;color:#7dd3fc;border:2px solid #00b4ff;padding:14px 0;border-radius:18px;font-size:1.25rem;font-weight:700;user-select:none;-webkit-user-select:none;touch-action:none}@media(max-width:820px),(pointer:coarse){.mctrls{display:flex}}</style></head><body>
 <div class="bar"><a href="/" class="brand">Tesca Space</a><div class="hud"><span>Score: <strong id="sc">0</strong></span><span>Best: <strong id="hi">0</strong></span><span>Lives: <strong id="lv">3</strong></span><span id="bdg" style="color:#38bdf8"></span></div>
 <div class="btns"><button type="button" class="hbtn" onclick="showHelp()">How to Play</button><a href="/" class="bbtn">Back to Wiki</a></div></div>
-<canvas id="cv" width="760" height="500" tabindex="0"></canvas>
+<canvas id="cv" width="760" height="500" tabindex="0"></canvas><div class="mctrls"><button type="button" class="mbtn" id="mLeft">&#9664; Left</button><button type="button" class="mbtn" id="mFire" style="background:linear-gradient(135deg,#0044cc,#00b4ff);color:#fff">FIRE</button><button type="button" class="mbtn" id="mRight">Right &#9654;</button></div>
 <div id="ov"><h1 id="ot">Tesca Space</h1><p id="sub">How to Play</p>
 <div class="box"><h3>Controls</h3><ul><li><strong>Move Left:</strong> Left Arrow or <strong>A</strong></li><li><strong>Move Right:</strong> Right Arrow or <strong>D</strong></li><li><strong>Fire Lasers:</strong> <strong>Spacebar</strong></li></ul></div>
 <div class="box"><h3>Rules and Scoring</h3><ul><li><strong>Objective:</strong> Blast incoming meteors before they hit your ship or reach the bottom.</li><li><strong>Scoring:</strong> +10 points per meteor. Speed increases as your score climbs.</li><li><strong>Lives:</strong> Start with 3 lives. Lose 1 if hit or a meteor slips past.</li></ul></div>
@@ -67,4 +67,29 @@ else if(rk.y-rk.r>cv.height){rocks.splice(i,1);hurt();}
 }
 for(let i=sparks.length-1;i>=0;i--){const p=sparks[i];p.x+=p.vx;p.y+=p.vy;p.life--;ctx.globalAlpha=p.life/24;ctx.fillStyle=p.col;ctx.fillRect(p.x,p.y,3,3);if(p.life<=0)sparks.splice(i,1);}
 ctx.globalAlpha=1;ctx.restore();requestAnimationFrame(loop);}
+function bindTouchBtn(id, code) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("touchstart", e => { e.preventDefault(); keys[code] = true; }, { passive: false });
+    el.addEventListener("touchend", e => { e.preventDefault(); keys[code] = false; }, { passive: false });
+    el.addEventListener("touchcancel", () => { keys[code] = false; });
+}
+bindTouchBtn("mLeft", "ArrowLeft");
+bindTouchBtn("mRight", "ArrowRight");
+bindTouchBtn("mFire", "Space");
+
+function moveShipToTouch(e) {
+    if (!run || !ship) return;
+    e.preventDefault();
+    const rect = cv.getBoundingClientRect();
+    const touch = e.touches;
+    const scaleX = cv.width / rect.width;
+    const targetX = (touch.clientX - rect.left) * scaleX - ship.w / 2;
+    ship.x = Math.max(12, Math.min(cv.width - ship.w - 12, targetX));
+    keys["Space"] = true;
+}
+cv.addEventListener("touchstart", moveShipToTouch, { passive: false });
+cv.addEventListener("touchmove", moveShipToTouch, { passive: false });
+cv.addEventListener("touchend", () => { keys["Space"] = false; });
 </script></body></html>"""
+
