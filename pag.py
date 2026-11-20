@@ -97,44 +97,135 @@ HOME_HTML = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta 
 __JS__<div class="bg-rings" style="position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0"><div style="position:absolute;width:420px;height:420px;border-radius:50%;top:15%;left:-140px;background:radial-gradient(circle,rgba(0,68,204,.22),transparent 70%)"></div><div style="position:absolute;width:440px;height:440px;border-radius:50%;bottom:10%;right:-140px;background:radial-gradient(circle,rgba(20,184,166,.22),transparent 70%)"></div><div style="position:absolute;width:240px;height:240px;border-radius:50%;top:34%;left:-95px;border:3px solid rgba(0,119,255,.22);box-shadow:0 0 0 34px rgba(20,184,166,.08)"></div><div style="position:absolute;width:280px;height:280px;border-radius:50%;top:22%;right:-115px;border:3px solid rgba(20,184,166,.24);box-shadow:0 0 0 38px rgba(0,68,204,.08)"></div></div><div class="mobile-aurora"></div><style>.side-panel{display:none;position:fixed;top:50%;transform:translateY(-50%);width:215px;background:var(--pill);border:1px solid var(--bdr);border-radius:18px;padding:16px;box-shadow:var(--sh);z-index:1100;font-size:.85rem;text-align:left;transition:transform .2s,border-color .2s}.side-panel:hover{border-color:var(--cyan)}.side-left{left:22px}.side-right{right:22px}.sp-title{font-size:.75rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--acc);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}.sp-clock{font-size:1.35rem;font-weight:800;color:var(--text);margin-bottom:2px}.sp-date{font-size:.78rem;color:var(--sub);margin-bottom:12px}.sp-btn{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--bdr);color:var(--text);padding:8px 11px;border-radius:12px;font-size:.82rem;font-weight:600;cursor:pointer;margin-bottom:8px;text-decoration:none}.sp-btn:hover{border-color:var(--cyan);color:var(--acc)}.sp-fact{font-size:.78rem;color:var(--sub);line-height:1.4;background:var(--card);padding:8px 10px;border-radius:10px;min-height:48px}.sp-score{font-size:1.4rem;font-weight:800;color:var(--acc);margin:4px 0 10px}.sp-rec a{display:block;padding:5px 8px;border-radius:8px;color:var(--text);text-decoration:none;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sp-rec a:hover{background:var(--card);color:var(--acc)}@media(max-width:932px),(pointer:coarse){.bg-rings{display:none!important}}.mobile-aurora{display:none}@media(max-width:932px),(pointer:coarse){.bg-rings{display:none!important}.mobile-aurora{display:block;position:fixed;top:-90px;left:50%;transform:translateX(-50%);width:130vw;height:280px;border-radius:50%;background:radial-gradient(ellipse at 50% 35%,rgba(0,119,255,.32) 0%,rgba(20,184,166,.22) 45%,transparent 75%);filter:blur(22px);pointer-events:none;z-index:0}}</style>
 <button type="button" onclick="toggleSide('leftPanel')" style="position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:1250;background:linear-gradient(135deg,#0044cc,#00b4ff);color:#fff;border:none;border-radius:0 14px 14px 0;padding:12px 10px;cursor:pointer;font-weight:700;box-shadow:0 4px 14px rgba(0,119,255,.35)" title="Toggle Live Pulse"><span class="desk-tab">⏱ Pulse</span><span class="mob-tab" id="leftArrow">&#9654;</span></button><aside id="leftPanel" class="side-panel side-left" style="left:44px"><div class="sp-title"><span>Live Pulse</span><span>&#9201;</span></div><div id="spClk" class="sp-clock">--:--</div><div id="spDt" class="sp-date">Loading...</div><button type="button" class="sp-btn" onclick="randWiki()">&#127922; Random Article</button><button type="button" class="sp-btn" onclick="loadFact()">&#128161; Quick Fact</button><div id="spFact" class="sp-fact">Click "Quick Fact" for a bite-sized discovery!</div></aside>
 <button type="button" onclick="toggleSide('rightPanel')" style="position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:1250;background:linear-gradient(135deg,#0044cc,#14b8a6);color:#fff;border:none;border-radius:14px 0 0 14px;padding:12px 10px;cursor:pointer;font-weight:700;box-shadow:0 4px 14px rgba(20,184,166,.35)" title="Toggle Tesca Space"><span class="desk-tab">🚀 Space</span><span class="mob-tab" id="rightArrow">&#9664;</span></button><aside id="rightPanel" class="side-panel side-right" style="right:44px"><div class="sp-title"><span>Tesca Space</span><span>&#128640;</span></div><div style="font-size:.78rem;color:var(--sub)">Your High Score</div><div id="spHi" class="sp-score">0 pts</div><a href="/game" class="sp-btn" style="text-align:center;background:linear-gradient(135deg,#0044cc,#00b4ff);color:#fff;border:none">Play Now</a><div class="sp-title" style="margin-top:12px"><span>Recent</span><span>&#128337;</span></div><div id="spRec" class="sp-rec"><span style="font-size:.78rem;color:var(--sub)">No searches yet</span></div></aside>
-<script>function toggleSide(id){const el=document.getElementById(id);if(!el)return;const open=el.style.display!=="block";el.style.display=open?"block":"none";const arr=document.getElementById(id==="leftPanel"?"leftArrow":"rightArrow");if(arr)arr.innerHTML=(id==="leftPanel")?(open?"&#9664;":"&#9654;"):(open?"&#9654;":"&#9664;");}function tick(){const d=new Date(),c=document.getElementById("spClk"),dt=document.getElementById("spDt");if(c)c.textContent=d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"});if(dt)dt.textContent=d.toLocaleDateString([],{weekday:"short",month:"short",day:"numeric"});}tick();setInterval(tick,1000);const hi=document.getElementById("spHi");if(hi)hi.textContent=(localStorage.getItem("tesca-hi")||0)+" pts";const recBox=document.getElementById("spRec"),hist=JSON.parse(localStorage.getItem("tesca-hist")||"[]");if(recBox&&hist.length){recBox.innerHTML=hist.slice(0,3).map(x=>`<a href="/search?q=${encodeURIComponent(x)}">&#128269; ${esc(x)}</a>`).join("");}const sf=document.querySelector("form[action='/search']");if(sf)sf.addEventListener("submit",()=>{const v=document.getElementById("qInput").value.trim();if(v){const h=[v,...hist.filter(i=>i!==v)].slice(0,5);localStorage.setItem("tesca-hist",JSON.stringify(h));}});async function randWiki(){try{const r=await fetch("/fact"),d=await r.json();if(d.title)location.href="/search?q="+encodeURIComponent(d.title);else alert("Could not fetch article.");}catch(e){alert("Error fetching article.");}}async function loadFact(){const box=document.getElementById("spFact");if(!box)return;box.textContent="Fetching...";try{const r=await fetch("/fact"),d=await r.json();box.textContent=d.extract||"Could not load fact.";}catch(e){box.textContent="Could not load fact.";}}</script><!-- TESCA_WELCOME_START -->
+<script>function toggleSide(id){const el=document.getElementById(id);if(!el)return;const open=el.style.display!=="block";el.style.display=open?"block":"none";const arr=document.getElementById(id==="leftPanel"?"leftArrow":"rightArrow");if(arr)arr.innerHTML=(id==="leftPanel")?(open?"&#9664;":"&#9654;"):(open?"&#9654;":"&#9664;");}function tick(){const d=new Date(),c=document.getElementById("spClk"),dt=document.getElementById("spDt");if(c)c.textContent=d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"});if(dt)dt.textContent=d.toLocaleDateString([],{weekday:"short",month:"short",day:"numeric"});}tick();setInterval(tick,1000);const hi=document.getElementById("spHi");if(hi)hi.textContent=(localStorage.getItem("tesca-hi")||0)+" pts";const recBox=document.getElementById("spRec"),hist=JSON.parse(localStorage.getItem("tesca-hist")||"[]");if(recBox&&hist.length){recBox.innerHTML=hist.slice(0,3).map(x=>`<a href="/search?q=${encodeURIComponent(x)}">&#128269; ${esc(x)}</a>`).join("");}const sf=document.querySelector("form[action='/search']");if(sf)sf.addEventListener("submit",()=>{const v=document.getElementById("qInput").value.trim();if(v){const h=[v,...hist.filter(i=>i!==v)].slice(0,5);localStorage.setItem("tesca-hist",JSON.stringify(h));}});async function randWiki(){try{const r=await fetch("/fact"),d=await r.json();if(d.title)location.href="/search?q="+encodeURIComponent(d.title);else alert("Could not fetch article.");}catch(e){alert("Error fetching article.");}}async function loadFact(){const box=document.getElementById("spFact");if(!box)return;box.textContent="Fetching...";try{const r=await fetch("/fact"),d=await r.json();box.textContent=d.extract||"Could not load fact.";}catch(e){box.textContent="Could not load fact.";}}</script>
+<!-- TESCA_WELCOME_START -->
 <style>
-.tw-backdrop{position:fixed;inset:0;background:rgba(4,7,17,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:2500;padding:16px}
-.tw-box{position:relative;width:100%;max-width:440px;background:var(--card);color:var(--text);border:2px solid var(--cyan);border-radius:20px;padding:36px 28px 56px;box-shadow:0 20px 50px rgba(0,0,0,.55);text-align:center;animation:twPop .25s ease}
-.tw-close{position:absolute;top:12px;right:14px;background:transparent;border:none;color:var(--text);font-size:1.35rem;font-weight:700;cursor:pointer;line-height:1;padding:4px 8px;border-radius:10px;opacity:.85}
-.tw-close:hover{opacity:1;background:var(--pill)}
-.tw-title{font-size:1.75rem;font-weight:800;letter-spacing:.4px;margin:6px 0}
-.tw-know{position:absolute;bottom:14px;right:16px;background:linear-gradient(135deg,#0044cc,#00b4ff);color:#fff;border:none;border-radius:999px;padding:7px 18px;font-size:.85rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,180,255,.35)}
-.tw-know:hover{transform:translateY(-1px)}
-.tw-desc{font-size:.95rem;line-height:1.55;color:var(--sub);margin:12px 0 18px;text-align:left}
-@keyframes twPop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.tw-backdrop{position:fixed;inset:0;background:rgba(4,7,17,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:2500;padding:16px;perspective:1000px;transition:opacity .32s ease}
+.tw-backdrop.tw-closing{opacity:0;pointer-events:none}
+#twStars{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.tw-box{position:relative;width:100%;max-width:450px;background:rgba(13,22,48,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:#f8fafc;border:2px solid #00b4ff;border-radius:22px;padding:38px 28px 58px;text-align:center;transform-style:preserve-3d;transition:transform .12s ease-out,box-shadow .3s ease,opacity .28s ease;animation:twPop .35s cubic-bezier(.16,1,.3,1),twNeon 3s ease-in-out infinite alternate;overflow:hidden}
+.tw-box.tw-zoom-out{transform:scale(.9) translateY(8px)!important;opacity:0}
+.tw-sheen{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(56,189,248,.22),transparent 60%);opacity:0;transition:opacity .25s}
+.tw-box:hover .tw-sheen{opacity:1}
+.tw-close{position:absolute;top:12px;right:14px;background:transparent;border:none;color:#e2e8f0;font-size:1.35rem;font-weight:700;cursor:pointer;line-height:1;padding:5px 9px;border-radius:10px;opacity:.85;z-index:2}
+.tw-close:hover{opacity:1;background:rgba(56,189,248,.18)}
+.tw-title{font-size:1.8rem;font-weight:800;letter-spacing:.5px;margin:6px 0;background:linear-gradient(90deg,#38bdf8,#2dd4bf,#60a5fa,#38bdf8);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:twShimmer 3.5s linear infinite;min-height:2.4rem}
+.tw-cursor{display:inline-block;width:3px;height:1.45rem;background:#38bdf8;margin-left:3px;vertical-align:middle;animation:twBlink .75s step-end infinite}
+.tw-know{position:absolute;bottom:14px;right:16px;background:linear-gradient(135deg,#0044cc,#00b4ff);color:#fff;border:none;border-radius:999px;padding:8px 18px;font-size:.86rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,180,255,.4);opacity:0;transform:translateY(6px);transition:opacity .45s ease,transform .45s ease,box-shadow .2s;z-index:2}
+.tw-know.tw-show{opacity:1;transform:translateY(0)}
+.tw-know:hover{box-shadow:0 6px 22px rgba(45,212,191,.55)}
+.tw-desc{font-size:.95rem;line-height:1.55;color:#cbd5e1;margin:12px 0 18px;text-align:left}
+@keyframes twPop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+@keyframes twNeon{from{border-color:#00b4ff;box-shadow:0 0 22px rgba(0,180,255,.35),inset 0 0 14px rgba(0,180,255,.12)}to{border-color:#2dd4bf;box-shadow:0 0 34px rgba(45,212,191,.55),inset 0 0 20px rgba(45,212,191,.18)}}
+@keyframes twShimmer{to{background-position:200% center}}
+@keyframes twBlink{50%{opacity:0}}
 </style>
 
 <div id="tescaWelcomeOverlay" class="tw-backdrop">
+  <canvas id="twStars"></canvas>
+
+  <!-- Box 1: Welcome to Tesca -->
   <div id="tescaWelcomeBox" class="tw-box">
+    <div class="tw-sheen"></div>
     <button type="button" class="tw-close" onclick="closeTescaWelcome()" title="Close">&#10005;</button>
-    <div class="tw-title">Welcome to Tesca</div>
-    <button type="button" class="tw-know" onclick="openTescaKnowMore()">Know more</button>
+    <div class="tw-title"><span id="twTypeText"></span><span id="twCursor" class="tw-cursor"></span></div>
+    <button type="button" id="twKnowBtn" class="tw-know" onclick="openTescaKnowMore()">Know more</button>
   </div>
 
+  <!-- Box 2: Description of Tesca -->
   <div id="tescaDescBox" class="tw-box" style="display:none;padding-bottom:26px">
+    <div class="tw-sheen"></div>
     <button type="button" class="tw-close" onclick="closeTescaWelcome()" title="Close">&#10005;</button>
-    <div class="tw-title" style="font-size:1.45rem">About Tesca</div>
+    <div class="tw-title" style="font-size:1.5rem">About Tesca</div>
     <p class="tw-desc">
-      <strong>Tesca</strong> is a fast, modern search engine built by <strong>Jayden</strong>. Search instant answers, check live discoveries in <strong>Live Pulse</strong>, switch between dark and light themes, or play the built-in <strong>Tesca Space</strong> arcade game.
+      <strong>Tesca</strong> is a fast, modern search engine built by <strong>Jayden</strong>. Explore instant answers, discover live facts in <strong>Live Pulse</strong>, switch between light and dark themes, or launch your ship in the built-in <strong>Tesca Space</strong> arcade game.
     </p>
-    <button type="button" class="btn" onclick="closeTescaWelcome()" style="width:100%;padding:10px">Start Exploring</button>
+    <button type="button" class="btn" onclick="closeTescaWelcome()" style="width:100%;padding:11px;position:relative;z-index:2">Start Exploring</button>
   </div>
 </div>
 
 <script>
+(function(){
+  // 1. Typewriter Text Reveal
+  const msg = "Welcome to Tesca";
+  const target = document.getElementById("twTypeText");
+  const knowBtn = document.getElementById("twKnowBtn");
+  let idx = 0;
+  function typeNext(){
+    if(!target) return;
+    if(idx < msg.length){
+      target.textContent += msg.charAt(idx++);
+      setTimeout(typeNext, 55);
+    } else if(knowBtn) {
+      knowBtn.classList.add("tw-show");
+    }
+  }
+  setTimeout(typeNext, 180);
+
+  // 2. Smooth 3D Hover Tilt & Light Sheen (Desktop)
+  document.querySelectorAll(".tw-box").forEach(card => {
+    card.addEventListener("mousemove", e => {
+      const r = card.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      const rx = ((y / r.height) - 0.5) * -10;
+      const ry = ((x / r.width) - 0.5) * 10;
+      card.style.setProperty("--mx", (x / r.width * 100) + "%");
+      card.style.setProperty("--my", (y / r.height * 100) + "%");
+      card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+    });
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "rotateX(0deg) rotateY(0deg)";
+    });
+  });
+
+  // 3. Stardust Particles behind card
+  const c = document.getElementById("twStars");
+  if(c){
+    const ctx = c.getContext("2d");
+    let w = c.width = window.innerWidth, h = c.height = window.innerHeight;
+    window.addEventListener("resize", () => { w = c.width = window.innerWidth; h = c.height = window.innerHeight; });
+    const pts = Array.from({length: 45}, () => ({
+      x: Math.random() * w, y: Math.random() * h,
+      r: Math.random() * 2 + 0.8,
+      vx: (Math.random() - 0.5) * 0.6, vy: -Math.random() * 0.7 - 0.2,
+      col: Math.random() > 0.5 ? "rgba(56,189,248,.75)" : "rgba(45,212,191,.75)"
+    }));
+    function animStars(){
+      const ov = document.getElementById("tescaWelcomeOverlay");
+      if(!ov || ov.style.display === "none") return;
+      ctx.clearRect(0, 0, w, h);
+      pts.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if(p.y < 0) p.y = h;
+        if(p.x < 0) p.x = w;
+        if(p.x > w) p.x = 0;
+        ctx.fillStyle = p.col;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+      });
+      requestAnimationFrame(animStars);
+    }
+    animStars();
+  }
+})();
+
 function closeTescaWelcome() {
-    const ov = document.getElementById("tescaWelcomeOverlay");
-    if (ov) ov.style.display = "none";
+  const ov = document.getElementById("tescaWelcomeOverlay");
+  document.querySelectorAll(".tw-box").forEach(b => b.classList.add("tw-zoom-out"));
+  if(ov){
+    ov.classList.add("tw-closing");
+    setTimeout(() => { ov.style.display = "none"; }, 300);
+  }
 }
+
 function openTescaKnowMore() {
-    document.getElementById("tescaWelcomeBox").style.display = "none";
-    document.getElementById("tescaDescBox").style.display = "block";
+  const wBox = document.getElementById("tescaWelcomeBox");
+  const dBox = document.getElementById("tescaDescBox");
+  wBox.classList.add("tw-zoom-out");
+  setTimeout(() => {
+    wBox.style.display = "none";
+    wBox.classList.remove("tw-zoom-out");
+    dBox.style.display = "block";
+  }, 220);
 }
 </script>
 <!-- TESCA_WELCOME_END -->
