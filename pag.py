@@ -1,4 +1,4 @@
-STYLE = """
+﻿STYLE = """
 :root{--bg:#ffffff;--card:#f8fafc;--text:#1e293b;--sub:#64748b;--acc:#0044cc;--cyan:#00b4ff;--bdr:#e2e8f0;--pill:#ffffff;--sh:0 4px 20px rgba(0,68,204,.08)}
 body.dark{--bg:#070d1f;--card:#111a33;--text:#f1f5f9;--sub:#94a3b8;--acc:#38bdf8;--cyan:#00b4ff;--bdr:#1e293b;--pill:#16203c;--sh:0 4px 24px rgba(0,0,0,.4)}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -47,7 +47,6 @@ h1{font-size:1.6rem;color:var(--text);margin:18px 0 16px;padding-bottom:8px;bord
 .r-title:hover{text-decoration:underline}
 .r-desc{font-size:.85rem;color:var(--sub);margin:3px 0 8px}
 .speak-btn{background:var(--card);border:1px solid var(--bdr);color:var(--text);padding:5px 12px;border-radius:14px;font-size:.8rem;cursor:pointer;margin-top:8px}
-100%{background-position:-200% 0}}
 """
 
 JS = """
@@ -284,6 +283,7 @@ function openTescaKnowMore() {
 </script>
 <!-- TESCA_WELCOME_END -->
 </body></html>""".replace("__STYLE__", STYLE).replace("__JS__", JS)
+
 
 
 
