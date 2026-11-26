@@ -1,4 +1,4 @@
-﻿STYLE = """
+STYLE = """
 :root{--bg:#ffffff;--card:#f8fafc;--text:#1e293b;--sub:#64748b;--acc:#0044cc;--cyan:#00b4ff;--bdr:#e2e8f0;--pill:#ffffff;--sh:0 4px 20px rgba(0,68,204,.08)}
 body.dark{--bg:#070d1f;--card:#111a33;--text:#f1f5f9;--sub:#94a3b8;--acc:#38bdf8;--cyan:#00b4ff;--bdr:#1e293b;--pill:#16203c;--sh:0 4px 24px rgba(0,0,0,.4)}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -47,6 +47,7 @@ h1{font-size:1.6rem;color:var(--text);margin:18px 0 16px;padding-bottom:8px;bord
 .r-title:hover{text-decoration:underline}
 .r-desc{font-size:.85rem;color:var(--sub);margin:3px 0 8px}
 .speak-btn{background:var(--card);border:1px solid var(--bdr);color:var(--text);padding:5px 12px;border-radius:14px;font-size:.8rem;cursor:pointer;margin-top:8px}
+100%{background-position:-200% 0}}
 """
 
 JS = """
@@ -70,21 +71,65 @@ function startVoice(){const SR=window.SpeechRecognition||window.webkitSpeechReco
 function speakText(b){window.speechSynthesis.cancel();window.speechSynthesis.speak(new SpeechSynthesisUtterance(b.getAttribute("data-text")));}
 async function loadResults(q,lucky){
 const out=document.getElementById("resOut");if(!out||!q)return;
+const ql=q.trim().toLowerCase();
+let greetHtml="";
+if(["hi","hello","hey","hiya","how are you","who are you"].includes(ql)){
+  greetHtml=`<div style="background:linear-gradient(135deg,rgba(0,68,204,.1),rgba(20,184,166,.12));border:1.5px solid var(--cyan);border-radius:16px;padding:20px 22px;margin-bottom:20px"><div style="font-size:.78rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--acc);margin-bottom:6px">Tesca Assistant</div><h3 style="margin-bottom:6px">Hi I'm Tesca</h3><p style="line-height:1.55">Ask me about any topic and feel free to play the built-in <a href="/game" style="color:var(--acc);font-weight:700">Tesca Space</a> game!</p></div>`;
+}
 try{
-const r=await fetch(WIKI+"/w/api.php?action=opensearch&format=json&origin=*&limit=6&search="+encodeURIComponent(q));
+const [r,spR]=await Promise.all([
+  fetch(WIKI+"/w/api.php?action=opensearch&format=json&origin=*&limit=6&profile=engine_autoselect&search="+encodeURIComponent(q)),
+  fetch(WIKI+"/w/api.php?action=query&list=search&srinfo=suggestion&srlimit=1&format=json&origin=*&srsearch="+encodeURIComponent(q))
+]);
+let didYouMeanHtml="";
+try{
+  const spD=await spR.json();
+  const sug=spD&&spD.query&&spD.query.searchinfo&&spD.query.searchinfo.suggestion;
+  if(sug && sug.toLowerCase()!==q.trim().toLowerCase()){
+    didYouMeanHtml=`<div style="margin-bottom:16px;font-size:.98rem;color:var(--sub)">Did you mean: <a href="/search?q=${encodeURIComponent(sug)}" style="color:var(--acc);font-weight:700;font-style:italic;text-decoration:none">${esc(sug)}</a>?</div>`;
+  }
+}catch(e){}
 const d=await r.json(),titles=Array.isArray(d)?d.at(1)||[]:[],urls=Array.isArray(d)?d.at(3)||[]:[];
-if(!titles.length){out.innerHTML="<p>No articles found for <strong>"+esc(q)+"</strong>.</p>";return;}
+if(!titles.length){out.innerHTML=(didYouMeanHtml+greetHtml)||"<p>No articles found for <strong>"+esc(q)+"</strong>.</p>";return;}
 if(lucky&&urls.at(0)){location.href=urls.at(0);return;}
-out.innerHTML="";
-for(const t of titles){
-const sr=await fetch(WIKI+"/api/rest_v1/page/summary/"+encodeURIComponent(t.replace(/ /g,"_")));
-if(!sr.ok)continue;
-const info=await sr.json(),el=document.createElement("div");el.className="item";
+const cKey="tesca-cache-v6-"+q.toLowerCase();
+const cached=sessionStorage.getItem(cKey);
+if(cached){out.innerHTML=cached;return;}
+out.innerHTML=[1,2,3].map(()=>'<div class="item"><div class="skel" style="width:92px;height:92px;flex-shrink:0"></div><div style="flex:1"><div class="skel" style="height:20px;width:55%;margin-bottom:10px"></div><div class="skel" style="height:14px;width:90%;margin-bottom:8px"></div><div class="skel" style="height:14px;width:75%"></div></div></div>').join("");
+const summaries=await Promise.all(titles.map(t=>fetch(WIKI+"/api/rest_v1/page/summary/"+encodeURIComponent(t.replace(/ /g,"_"))).then(res=>res.ok?res.json():null).catch(()=>null)));
+try{
+  const cr=await fetch("/chat?q="+encodeURIComponent(q));
+  const cd=await cr.json();
+  if(cd&&cd.title){
+    const label=cd.type==="meme"?"Tesca Meme Drop":"Tesca Chat";
+    
+    greetHtml+=`<div style="background:linear-gradient(135deg,rgba(0,68,204,.1),rgba(20,184,166,.12));border:1.5px solid var(--cyan);border-radius:16px;padding:18px 20px;margin-bottom:20px"><div style="font-size:.75rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--acc);margin-bottom:4px">${label}</div><h3 style="margin-bottom:6px">${esc(cd.title)}</h3><p style="line-height:1.55">${esc(cd.text)}</p>${cd.img?`<img src="${esc(cd.img)}" alt="Meme" style="max-width:100%;max-height:340px;border-radius:12px;margin-top:10px;display:block">`:""}</div>`;
+  }
+}catch(e){}
+out.innerHTML=didYouMeanHtml+greetHtml;
+summaries.forEach((info,i)=>{
+if(!info)return;
+const t=titles[i],el=document.createElement("div");el.className="item";
 const img=info.thumbnail&&info.thumbnail.source?`<img src="${esc(info.thumbnail.source)}" class="thumb" alt="">`:"";
 const pageUrl=(info.content_urls&&info.content_urls.desktop&&info.content_urls.desktop.page)||WIKI+"/wiki/"+encodeURIComponent(t);
 el.innerHTML=`${img}<div><a href="${esc(pageUrl)}" target="_blank" rel="noopener" class="r-title">${esc(info.title||t)}</a><div class="r-desc">${esc(info.description||"General Topic")}</div><p>${esc(info.extract)}</p><button type="button" class="speak-btn" onclick="speakText(this)">Listen to Summary</button></div>`;
 el.querySelector("button").setAttribute("data-text",info.extract||"");
-out.appendChild(el);}
+out.appendChild(el);
+});
+const valid=summaries.filter(x=>x&&x.extract);
+if(valid.length){
+  const points=valid.slice(0,3).map(x=>{
+    const firstSent=x.extract.split(". ")[0].replace(/\.$/,"");
+    return `<li><strong>${esc(x.title)}:</strong> ${esc(firstSent)}.</li>`;
+  }).join("");
+  const plainSummary=valid.slice(0,3).map(x=>x.extract.split(". ")[0]).join(". ");
+  const aiBox=document.createElement("div");
+  aiBox.style.cssText="margin-top:24px;padding:20px 22px;border-radius:16px;background:linear-gradient(135deg,rgba(0,68,204,.08),rgba(20,184,166,.12));border:1.5px solid var(--cyan);box-shadow:var(--sh);";
+  aiBox.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-size:.82rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--acc)">&#10024; Tesca AI Overview</span><span style="font-size:.75rem;color:var(--sub)">Synthesized from ${valid.slice(0,3).length} sources</span></div><ul style="padding-left:18px;line-height:1.6;margin-bottom:12px">${points}</ul><button type="button" class="speak-btn" onclick="speakText(this)">&#128266; Listen to AI Overview</button>`;
+  aiBox.querySelector("button").setAttribute("data-text",plainSummary);
+  out.appendChild(aiBox);
+}
+sessionStorage.setItem(cKey,out.innerHTML);
 }catch(e){out.innerHTML="<p>Search failed. Check your internet connection.</p>";}}
 </script>
 """

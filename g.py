@@ -1,4 +1,4 @@
-﻿GAME_HTML = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+GAME_HTML = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Tesca Space</title><style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#050914;color:#e2e8f0;font-family:"Segoe UI",Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;overflow:hidden}
@@ -28,11 +28,14 @@ canvas{touch-action:none;background:radial-gradient(circle at 50% 40%,#0f1e45 0%
 <button class="go" onclick="start()">Launch Ship</button></div>
 <script>
 const cv=document.getElementById("cv"),ctx=cv.getContext("2d"),scE=document.getElementById("sc"),hiE=document.getElementById("hi"),lvE=document.getElementById("lv"),bdg=document.getElementById("bdg"),ov=document.getElementById("ov"),ot=document.getElementById("ot"),sub=document.getElementById("sub");
+const actx=new (window.AudioContext||window.webkitAudioContext)();
+function sfx(f,t,d,v){try{if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.setValueAtTime(f,actx.currentTime);o.frequency.exponentialRampToValueAtTime(f*0.35,actx.currentTime+d);g.gain.setValueAtTime(v,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+d);}catch(e){}}
+let powers=[],triple=0,shield=false;
 let ship,lasers,rocks,sparks,stars,score,best=+(localStorage.getItem("tesca-hi")||0),lives,run=false,keys={},sec="",slow=false,shake=0;
 hiE.textContent=best;
 function initStars(){stars=Array.from({length:80},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.8+.4,s:Math.random()*1.8+.4,a:Math.random()}));}
 function showHelp(){run=false;ot.textContent="Tesca Space";sub.textContent="How to Play";ov.style.display="block";}
-function start(){ship={x:358,y:440,w:44,h:40,spd:6.5,cd:0};lasers=[];rocks=[];sparks=[];score=0;lives=3;run=true;slow=false;shake=0;bdg.textContent="";scE.textContent=0;lvE.textContent=3;ov.style.display="none";cv.focus();initStars();requestAnimationFrame(loop);}
+function start(){ship={x:358,y:440,w:44,h:40,spd:6.5,cd:0};lasers=[];rocks=[];sparks=[];powers=[];triple=0;shield=false;score=0;lives=3;run=true;slow=false;shake=0;bdg.textContent="";scE.textContent=0;lvE.textContent=3;ov.style.display="none";cv.focus();initStars();requestAnimationFrame(loop);}
 document.addEventListener("keydown",e=>{keys[e.code]=true;if(e.code==="Space"&&run)e.preventDefault();if(e.key.length===1&&run){sec=(sec+e.key.toLowerCase()).slice(-4);if(sec==="slow"){slow=!slow;bdg.textContent=slow?"[SLOW-MO]":"";}}});
 document.addEventListener("keyup",e=>{keys[e.code]=false;});
 function boom(x,y,col){for(let i=0;i<14;i++){const a=Math.random()*Math.PI*2,v=Math.random()*4+1;sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:24,col});}}
@@ -43,7 +46,7 @@ stars.forEach(st=>{st.y+=st.s*f;if(st.y>cv.height){st.y=0;st.x=Math.random()*cv.
 if((keys["ArrowLeft"]||keys["KeyA"])&&ship.x>12)ship.x-=ship.spd;
 if((keys["ArrowRight"]||keys["KeyD"])&&ship.x<cv.width-ship.w-12)ship.x+=ship.spd;
 if(ship.cd>0)ship.cd--;
-if(keys["Space"]&&ship.cd===0){lasers.push({x:ship.x+ship.w/2-2,y:ship.y-6,w:4,h:18,spd:10});ship.cd=12;}
+if(keys["Space"]&&ship.cd===0){sfx(680,"square",0.09,0.06);if(triple>0){lasers.push({x:ship.x+4,y:ship.y,w:4,h:18,spd:10},{x:ship.x+ship.w/2-2,y:ship.y-6,w:4,h:18,spd:10},{x:ship.x+ship.w-8,y:ship.y,w:4,h:18,spd:10});triple--;}else{lasers.push({x:ship.x+ship.w/2-2,y:ship.y-6,w:4,h:18,spd:10});}ship.cd=12;}
 ctx.fillStyle="#38bdf8";ctx.beginPath();ctx.moveTo(ship.x+16,ship.y+34);ctx.lineTo(ship.x+22,ship.y+44+Math.random()*8);ctx.lineTo(ship.x+28,ship.y+34);ctx.fill();
 const g=ctx.createLinearGradient(ship.x,ship.y,ship.x,ship.y+ship.h);g.addColorStop(0,"#38bdf8");g.addColorStop(1,"#0044cc");
 ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(ship.x+22,ship.y);ctx.lineTo(ship.x+44,ship.y+36);ctx.lineTo(ship.x+28,ship.y+30);ctx.lineTo(ship.x+22,ship.y+36);ctx.lineTo(ship.x+16,ship.y+30);ctx.lineTo(ship.x,ship.y+36);ctx.closePath();ctx.fill();
@@ -60,12 +63,12 @@ ctx.fillStyle=rg;ctx.beginPath();ctx.arc(0,0,rk.r,0,Math.PI*2);ctx.fill();
 ctx.fillStyle="rgba(0,0,0,.22)";ctx.beginPath();ctx.arc(-rk.r*.3,-rk.r*.2,rk.r*.25,0,Math.PI*2);ctx.arc(rk.r*.25,rk.r*.2,rk.r*.18,0,Math.PI*2);ctx.fill();
 ctx.restore();
 let hit=false;
-for(let j=lasers.length-1;j>=0;j--){const b=lasers[j];if(Math.hypot(b.x+2-rk.x,b.y-rk.y)<rk.r+6){lasers.splice(j,1);rocks.splice(i,1);boom(rk.x,rk.y,slow?"#38bdf8":"#fb923c");score+=10;scE.textContent=score;hit=true;break;}}
+for(let j=lasers.length-1;j>=0;j--){const b=lasers[j];if(Math.hypot(b.x+2-rk.x,b.y-rk.y)<rk.r+6){lasers.splice(j,1);rocks.splice(i,1);boom(rk.x,rk.y,slow?"#38bdf8":"#fb923c");sfx(160,"sawtooth",0.15,0.09);score+=10;scE.textContent=score;if(Math.random()<0.08){const ts=["triple","triple","shield","shield","life"];powers.push({x:rk.x,y:rk.y,t:ts[Math.floor(Math.random()*ts.length)]});}hit=true;break;}}
 if(hit)continue;
 if(Math.hypot(ship.x+22-rk.x,ship.y+20-rk.y)<rk.r+16){rocks.splice(i,1);boom(rk.x,rk.y,"#ef4444");hurt();}
 else if(rk.y-rk.r>cv.height){rocks.splice(i,1);hurt();}
 }
-for(let i=sparks.length-1;i>=0;i--){const p=sparks[i];p.x+=p.vx;p.y+=p.vy;p.life--;ctx.globalAlpha=p.life/24;ctx.fillStyle=p.col;ctx.fillRect(p.x,p.y,3,3);if(p.life<=0)sparks.splice(i,1);}
+for(let i=powers.length-1;i>=0;i--){const w=powers[i];w.y+=2.2;ctx.fillStyle=w.t==="triple"?"#38bdf8":(w.t==="shield"?"#2dd4bf":"#f43f5e");ctx.beginPath();ctx.arc(w.x,w.y,11,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.font="bold 11px Arial";ctx.textAlign="center";ctx.fillText(w.t==="triple"?"3X":(w.t==="shield"?"S":"+1"),w.x,w.y+4);if(Math.hypot(ship.x+22-w.x,ship.y+20-w.y)<28){sfx(880,"sine",0.18,0.1);if(w.t==="triple")triple=35;else if(w.t==="shield")shield=true;else{lives++;lvE.textContent=lives;}powers.splice(i,1);}else if(w.y>cv.height+20)powers.splice(i,1);}for(let i=sparks.length-1;i>=0;i--){const p=sparks[i];p.x+=p.vx;p.y+=p.vy;p.life--;ctx.globalAlpha=p.life/24;ctx.fillStyle=p.col;ctx.fillRect(p.x,p.y,3,3);if(p.life<=0)sparks.splice(i,1);}
 ctx.globalAlpha=1;ctx.restore();requestAnimationFrame(loop);}
 function bindTouchBtn(id, code) {
     const el = document.getElementById(id);
