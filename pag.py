@@ -92,7 +92,7 @@ try{
 const d=await r.json(),titles=Array.isArray(d)?d.at(1)||[]:[],urls=Array.isArray(d)?d.at(3)||[]:[];
 if(!titles.length){out.innerHTML=(didYouMeanHtml+greetHtml)||"<p>No articles found for <strong>"+esc(q)+"</strong>.</p>";return;}
 if(lucky&&urls.at(0)){location.href=urls.at(0);return;}
-const cKey="tesca-cache-v6-"+q.toLowerCase();
+const cKey="tesca-cache-v7-"+q.toLowerCase();
 const cached=sessionStorage.getItem(cKey);
 if(cached){out.innerHTML=cached;return;}
 out.innerHTML=[1,2,3].map(()=>'<div class="item"><div class="skel" style="width:92px;height:92px;flex-shrink:0"></div><div style="flex:1"><div class="skel" style="height:20px;width:55%;margin-bottom:10px"></div><div class="skel" style="height:14px;width:90%;margin-bottom:8px"></div><div class="skel" style="height:14px;width:75%"></div></div></div>').join("");
@@ -117,7 +117,16 @@ el.querySelector("button").setAttribute("data-text",info.extract||"");
 out.appendChild(el);
 });
 const valid=summaries.filter(x=>x&&x.extract);
-if(valid.length){
+const dateWords={"today":0,"what is today":0,"todays date":0,"today's date":0,"tomorrow":1,"what is tomorrow":1,"tomorrows date":1,"tomorrow's date":1,"yesterday":-1,"what was yesterday":-1};
+const dOff=dateWords[q.trim().toLowerCase().replace(/[?]/g,"")];
+let dateBullet="";
+if(dOff!==undefined){
+  const dt=new Date();dt.setDate(dt.getDate()+dOff);
+  const label=dOff===0?"Today is":(dOff===1?"Tomorrow is":"Yesterday was");
+  const fmt=dt.toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  dateBullet=`<li><strong>${label} ${fmt}.</strong></li>`;
+}
+if(valid.length || dateBullet){
   const points=valid.slice(0,3).map(x=>{
     const firstSent=x.extract.split(". ")[0].replace(/\.$/,"");
     return `<li><strong>${esc(x.title)}:</strong> ${esc(firstSent)}.</li>`;
@@ -125,7 +134,7 @@ if(valid.length){
   const plainSummary=valid.slice(0,3).map(x=>x.extract.split(". ")[0]).join(". ");
   const aiBox=document.createElement("div");
   aiBox.style.cssText="margin-top:24px;padding:20px 22px;border-radius:16px;background:linear-gradient(135deg,rgba(0,68,204,.08),rgba(20,184,166,.12));border:1.5px solid var(--cyan);box-shadow:var(--sh);";
-  aiBox.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-size:.82rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--acc)">&#10024; Tesca AI Overview</span><span style="font-size:.75rem;color:var(--sub)">Synthesized from ${valid.slice(0,3).length} sources</span></div><ul style="padding-left:18px;line-height:1.6;margin-bottom:12px">${points}</ul><button type="button" class="speak-btn" onclick="speakText(this)">&#128266; Listen to AI Overview</button>`;
+  aiBox.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-size:.82rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--acc)">&#10024; Tesca AI Overview</span><span style="font-size:.75rem;color:var(--sub)">Synthesized from ${valid.slice(0,3).length} sources</span></div><ul style="padding-left:18px;line-height:1.6;margin-bottom:12px">${dateBullet}${points}</ul><button type="button" class="speak-btn" onclick="speakText(this)">&#128266; Listen to AI Overview</button>`;
   aiBox.querySelector("button").setAttribute("data-text",plainSummary);
   out.appendChild(aiBox);
 }
