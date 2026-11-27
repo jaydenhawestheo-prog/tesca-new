@@ -73,24 +73,58 @@ if(!boss&&score>=nextBoss){const hp=24+Math.floor(score/500)*8;boss={x:380,y:65,
 if(boss){
   boss.x+=boss.vx*(slow?0.5:1);if(boss.x<65||boss.x>cv.width-65)boss.vx*=-1;
   boss.cd--;if(boss.cd<=0){bossShots.push({x:boss.x-18,y:boss.y+24},{x:boss.x+18,y:boss.y+24});boss.cd=slow?75:45;}
-    ctx.save();ctx.translate(boss.x,boss.y);
-  const fl=6+Math.random()*6;
-  ctx.fillStyle="#38bdf8";ctx.beginPath();ctx.moveTo(-14,-24);ctx.lineTo(-8,-24);ctx.lineTo(-11,-24-fl);ctx.fill();
-  ctx.beginPath();ctx.moveTo(8,-24);ctx.lineTo(14,-24);ctx.lineTo(11,-24-fl);ctx.fill();
-  const wg=ctx.createLinearGradient(0,-25,0,32);wg.addColorStop(0,"#7f1d1d");wg.addColorStop(0.5,"#dc2626");wg.addColorStop(1,"#450a0a");
-  ctx.fillStyle=wg;ctx.strokeStyle="#fca5a5";ctx.lineWidth=1.2;
-  ctx.beginPath();ctx.moveTo(-22,-10);ctx.quadraticCurveTo(-56,-22,-54,28);ctx.quadraticCurveTo(-42,12,-24,14);ctx.closePath();ctx.fill();ctx.stroke();
-  ctx.beginPath();ctx.moveTo(22,-10);ctx.quadraticCurveTo(56,-22,54,28);ctx.quadraticCurveTo(42,12,24,14);ctx.closePath();ctx.fill();ctx.stroke();
-  ctx.fillStyle="#1e293b";ctx.fillRect(-42,4,8,14);ctx.fillRect(34,4,8,14);
-  ctx.fillStyle="#f43f5e";ctx.beginPath();ctx.arc(-38,18,3,0,Math.PI*2);ctx.arc(38,18,3,0,Math.PI*2);ctx.fill();
-  const hg=ctx.createLinearGradient(-22,-26,22,34);hg.addColorStop(0,"#334155");hg.addColorStop(0.5,"#b91c1c");hg.addColorStop(1,"#1e293b");
-  ctx.fillStyle=hg;ctx.beginPath();ctx.moveTo(0,36);ctx.lineTo(22,12);ctx.lineTo(18,-24);ctx.lineTo(0,-16);ctx.lineTo(-18,-24);ctx.lineTo(-22,12);ctx.closePath();ctx.fill();ctx.stroke();
-  ctx.fillStyle="#0f172a";ctx.fillRect(-10,-6,20,18);
-  ctx.fillStyle="#ef4444";ctx.shadowColor="#ef4444";ctx.shadowBlur=8;
-  ctx.beginPath();ctx.moveTo(-7,16);ctx.lineTo(7,16);ctx.lineTo(0,26);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
-  ctx.fillStyle="rgba(15,23,42,.9)";ctx.fillRect(-52,-42,104,8);
-  ctx.strokeStyle="#475569";ctx.lineWidth=1;ctx.strokeRect(-52,-42,104,8);
-  ctx.fillStyle="#ef4444";ctx.fillRect(-50,-40,100*(boss.hp/boss.maxHp),4);
+      ctx.save();ctx.translate(boss.x,boss.y);
+  // 3D ambient drop shadow & red engine aura
+  ctx.shadowColor="rgba(220,38,38,0.45)";ctx.shadowBlur=18;ctx.shadowOffsetY=10;
+  // Twin rear blue ion exhaust plumes
+  const fl=10+Math.random()*9;
+  const eg=ctx.createLinearGradient(0,-24,0,-24-fl);eg.addColorStop(0,"#e0f2fe");eg.addColorStop(0.4,"#0284c7");eg.addColorStop(1,"transparent");
+  ctx.fillStyle=eg;
+  ctx.beginPath();ctx.moveTo(-16,-22);ctx.lineTo(-7,-22);ctx.lineTo(-11.5,-22-fl);ctx.fill();
+  ctx.beginPath();ctx.moveTo(7,-22);ctx.lineTo(16,-22);ctx.lineTo(11.5,-22-fl);ctx.fill();
+  ctx.shadowOffsetY=0;ctx.shadowBlur=0;
+
+  // Outer swept crimson sickle wings with 3D cylindrical gradient
+  const wgL=ctx.createLinearGradient(-58,0,-18,0);wgL.addColorStop(0,"#450a0a");wgL.addColorStop(0.35,"#ef4444");wgL.addColorStop(0.7,"#991b1b");wgL.addColorStop(1,"#1e293b");
+  const wgR=ctx.createLinearGradient(58,0,18,0);wgR.addColorStop(0,"#450a0a");wgR.addColorStop(0.35,"#ef4444");wgR.addColorStop(0.7,"#991b1b");wgR.addColorStop(1,"#1e293b");
+  ctx.fillStyle=wgL;ctx.beginPath();ctx.moveTo(-20,-12);ctx.quadraticCurveTo(-60,-26,-56,30);ctx.quadraticCurveTo(-43,10,-22,15);ctx.closePath();ctx.fill();
+  ctx.fillStyle=wgR;ctx.beginPath();ctx.moveTo(20,-12);ctx.quadraticCurveTo(60,-26,56,30);ctx.quadraticCurveTo(43,10,22,15);ctx.closePath();ctx.fill();
+  // Specular metallic bevel edge on sickle blades
+  ctx.strokeStyle="#fca5a5";ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(-22,-11);ctx.quadraticCurveTo(-58,-24,-55,28);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(22,-11);ctx.quadraticCurveTo(58,-24,55,28);ctx.stroke();
+
+  // Gunmetal armored wing pylons & glowing plasma cannon barrels
+  const pg=ctx.createLinearGradient(-46,0,-32,0);pg.addColorStop(0,"#0f172a");pg.addColorStop(0.5,"#64748b");pg.addColorStop(1,"#0f172a");
+  ctx.fillStyle=pg;ctx.fillRect(-44,2,10,18);
+  const pg2=ctx.createLinearGradient(32,0,46,0);pg2.addColorStop(0,"#0f172a");pg2.addColorStop(0.5,"#64748b");pg2.addColorStop(1,"#0f172a");
+  ctx.fillStyle=pg2;ctx.fillRect(34,2,10,18);
+  ctx.fillStyle="#f43f5e";ctx.shadowColor="#f43f5e";ctx.shadowBlur=10;
+  ctx.beginPath();ctx.arc(-39,21,3.5,0,Math.PI*2);ctx.arc(39,21,3.5,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+
+  // Main 3D beveled fuselage hull (left-to-right metallic specular lighting)
+  const hg=ctx.createLinearGradient(-24,0,24,0);
+  hg.addColorStop(0,"#1e293b");hg.addColorStop(0.25,"#991b1b");hg.addColorStop(0.5,"#f87171");hg.addColorStop(0.75,"#7f1d1d");hg.addColorStop(1,"#0f172a");
+  ctx.fillStyle=hg;
+  ctx.beginPath();ctx.moveTo(0,38);ctx.lineTo(24,12);ctx.lineTo(20,-24);ctx.lineTo(0,-15);ctx.lineTo(-20,-24);ctx.lineTo(-24,12);ctx.closePath();ctx.fill();
+  ctx.strokeStyle="#cbd5e1";ctx.lineWidth=1;ctx.stroke();
+
+  // Raised 3D gunmetal armor spine & vents
+  const sp=ctx.createLinearGradient(-11,0,11,0);sp.addColorStop(0,"#0f172a");sp.addColorStop(0.5,"#475569");sp.addColorStop(1,"#0f172a");
+  ctx.fillStyle=sp;ctx.beginPath();ctx.moveTo(0,18);ctx.lineTo(11,4);ctx.lineTo(9,-14);ctx.lineTo(-9,-14);ctx.lineTo(-11,4);ctx.closePath();ctx.fill();
+  ctx.strokeStyle="#94a3b8";ctx.lineWidth=0.8;ctx.stroke();
+
+  // Glowing 3D command core & crimson laser visor
+  ctx.fillStyle="#ef4444";ctx.shadowColor="#ef4444";ctx.shadowBlur=12;
+  ctx.beginPath();ctx.moveTo(-7,19);ctx.lineTo(7,19);ctx.lineTo(0,30);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#fecaca";ctx.beginPath();ctx.arc(0,22,2.2,0,Math.PI*2);ctx.fill();
+  ctx.shadowBlur=0;
+
+  // Metallic Boss HP Bar
+  ctx.fillStyle="rgba(2,6,23,.9)";ctx.fillRect(-54,-44,108,9);
+  ctx.strokeStyle="#64748b";ctx.lineWidth=1;ctx.strokeRect(-54,-44,108,9);
+  const hpg=ctx.createLinearGradient(-52,0,52,0);hpg.addColorStop(0,"#dc2626");hpg.addColorStop(1,"#f87171");
+  ctx.fillStyle=hpg;ctx.fillRect(-52,-42,104*(boss.hp/boss.maxHp),5);
   ctx.restore();
   for(let j=lasers.length-1;j>=0;j--){const b=lasers[j];if(Math.hypot(b.x+2-boss.x,b.y-boss.y)<boss.r){lasers.splice(j,1);boss.hp--;sfx(400,"square",0.05,0.05);if(boss.hp<=0){boom(boss.x,boss.y,"#a855f7");pops.push({x:boss.x,y:boss.y,t:"+150 BOSS!",life:45,c:"#a855f7"});sfx(150,"sawtooth",0.4,0.14);score+=150;scE.textContent=score;boss=null;break;}}}
 }
@@ -122,6 +156,7 @@ cv.addEventListener("touchstart", moveShipToTouch, { passive: false });
 cv.addEventListener("touchmove", moveShipToTouch, { passive: false });
 cv.addEventListener("touchend", () => { keys["Space"] = false; });
 </script></body></html>"""
+
 
 
 
