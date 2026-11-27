@@ -73,27 +73,21 @@ if(!boss&&score>=nextBoss){const hp=24+Math.floor(score/500)*8;boss={x:380,y:65,
 if(boss){
   boss.x+=boss.vx*(slow?0.5:1);if(boss.x<65||boss.x>cv.width-65)boss.vx*=-1;
   boss.cd--;if(boss.cd<=0){bossShots.push({x:boss.x-18,y:boss.y+24},{x:boss.x+18,y:boss.y+24});boss.cd=slow?75:45;}
-  ctx.save();ctx.translate(boss.x,boss.y);
-  // Twin rear plasma thrusters
+    ctx.save();ctx.translate(boss.x,boss.y);
   const fl=6+Math.random()*6;
   ctx.fillStyle="#38bdf8";ctx.beginPath();ctx.moveTo(-14,-24);ctx.lineTo(-8,-24);ctx.lineTo(-11,-24-fl);ctx.fill();
   ctx.beginPath();ctx.moveTo(8,-24);ctx.lineTo(14,-24);ctx.lineTo(11,-24-fl);ctx.fill();
-  // Outer swept crimson sickle wings
   const wg=ctx.createLinearGradient(0,-25,0,32);wg.addColorStop(0,"#7f1d1d");wg.addColorStop(0.5,"#dc2626");wg.addColorStop(1,"#450a0a");
   ctx.fillStyle=wg;ctx.strokeStyle="#fca5a5";ctx.lineWidth=1.2;
   ctx.beginPath();ctx.moveTo(-22,-10);ctx.quadraticCurveTo(-56,-22,-54,28);ctx.quadraticCurveTo(-42,12,-24,14);ctx.closePath();ctx.fill();ctx.stroke();
   ctx.beginPath();ctx.moveTo(22,-10);ctx.quadraticCurveTo(56,-22,54,28);ctx.quadraticCurveTo(42,12,24,14);ctx.closePath();ctx.fill();ctx.stroke();
-  // Gunmetal armor struts & wingtip laser pods
   ctx.fillStyle="#1e293b";ctx.fillRect(-42,4,8,14);ctx.fillRect(34,4,8,14);
   ctx.fillStyle="#f43f5e";ctx.beginPath();ctx.arc(-38,18,3,0,Math.PI*2);ctx.arc(38,18,3,0,Math.PI*2);ctx.fill();
-  // Central armored fuselage
   const hg=ctx.createLinearGradient(-22,-26,22,34);hg.addColorStop(0,"#334155");hg.addColorStop(0.5,"#b91c1c");hg.addColorStop(1,"#1e293b");
   ctx.fillStyle=hg;ctx.beginPath();ctx.moveTo(0,36);ctx.lineTo(22,12);ctx.lineTo(18,-24);ctx.lineTo(0,-16);ctx.lineTo(-18,-24);ctx.lineTo(-22,12);ctx.closePath();ctx.fill();ctx.stroke();
-  // Dark metallic core plate & glowing crimson bridge visor
   ctx.fillStyle="#0f172a";ctx.fillRect(-10,-6,20,18);
   ctx.fillStyle="#ef4444";ctx.shadowColor="#ef4444";ctx.shadowBlur=8;
   ctx.beginPath();ctx.moveTo(-7,16);ctx.lineTo(7,16);ctx.lineTo(0,26);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
-  // Armored Boss HP Bar
   ctx.fillStyle="rgba(15,23,42,.9)";ctx.fillRect(-52,-42,104,8);
   ctx.strokeStyle="#475569";ctx.lineWidth=1;ctx.strokeRect(-52,-42,104,8);
   ctx.fillStyle="#ef4444";ctx.fillRect(-50,-40,100*(boss.hp/boss.maxHp),4);
@@ -128,6 +122,7 @@ cv.addEventListener("touchstart", moveShipToTouch, { passive: false });
 cv.addEventListener("touchmove", moveShipToTouch, { passive: false });
 cv.addEventListener("touchend", () => { keys["Space"] = false; });
 </script></body></html>"""
+
 
 
 
