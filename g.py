@@ -67,8 +67,8 @@ ctx.restore();
 let hit=false;
 for(let j=lasers.length-1;j>=0;j--){const b=lasers[j];if(Math.hypot(b.x+2-rk.x,b.y-rk.y)<rk.r+6){lasers.splice(j,1);rocks.splice(i,1);boom(rk.x,rk.y,slow?"#38bdf8":"#fb923c");sfx(160,"sawtooth",0.15,0.09);score+=10;scE.textContent=score;pops.push({x:rk.x,y:rk.y,t:"+10",life:26,c:"#38bdf8"});if(Math.random()<0.22){const ts=["triple","triple","shield","shield","life"];powers.push({x:rk.x,y:rk.y,t:ts[Math.floor(Math.random()*ts.length)]});}hit=true;break;}}
 if(hit)continue;
-if(Math.hypot(ship.x+22-rk.x,ship.y+20-rk.y)<rk.r+16){rocks.splice(i,1);boom(rk.x,rk.y,"#ef4444");hurt();}
-else if(rk.y-rk.r>cv.height){rocks.splice(i,1);hurt(true);}
+if(Math.hypot(ship.x+22-rk.x,ship.y+20-rk.y)<rk.r+16){rocks.splice(i,1);boom(rk.x,rk.y,"#ef4444");hurt(true);}
+else if(rk.y-rk.r>cv.height){rocks.splice(i,1);hurt();}
 }
 if(!boss&&score>=nextBoss){const hp=24+Math.floor(score/500)*8;vaporizeRocks();boss={x:380,y:82,r:54,vx:2.4,hp:hp,maxHp:hp,cd:45};nextBoss+=500;pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});sfx(220,"sawtooth",0.3,0.1);}
 if(boss){
@@ -158,6 +158,7 @@ cv.addEventListener("touchstart", moveShipToTouch, { passive: false });
 cv.addEventListener("touchmove", moveShipToTouch, { passive: false });
 cv.addEventListener("touchend", () => { keys["Space"] = false; });
 </script></body></html>"""
+
 
 
 
