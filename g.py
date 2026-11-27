@@ -31,7 +31,7 @@ const cv=document.getElementById("cv"),ctx=cv.getContext("2d"),scE=document.getE
 const actx=new (window.AudioContext||window.webkitAudioContext)();
 function sfx(f,t,d,v){try{if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.setValueAtTime(f,actx.currentTime);o.frequency.exponentialRampToValueAtTime(f*0.35,actx.currentTime+d);g.gain.setValueAtTime(v,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+d);}catch(e){}}
 let powers=[],triple=0,shield=false,boss=null,bossShots=[],nextBoss=500,pops=[];
-window.addEventListener("keydown",e=>{if(typeof run!=="undefined"&&run){if(e.key.toLowerCase()==="h"){shield=!shield;sfx(600,"sine",0.12,0.08);}if(e.key.toLowerCase()==="b"&&!boss){rocks=[];boss={x:380,y:82,r:54,vx:2.4,hp:24,maxHp:24,cd:45};pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});}}});
+window.addEventListener("keydown",e=>{if(typeof run!=="undefined"&&run){if(e.key.toLowerCase()==="h"){shield=!shield;sfx(600,"sine",0.12,0.08);}if(e.key.toLowerCase()==="b"&&!boss){rocks=[];vaporizeRocks();boss={x:380,y:82,r:54,vx:2.4,hp:24,maxHp:24,cd:45};pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});}}});
 let ship,lasers,rocks,sparks,stars,score,best=+(localStorage.getItem("tesca-hi")||0),lives,run=false,keys={},sec="",slow=false,shake=0;
 hiE.textContent=best;
 function initStars(){stars=Array.from({length:80},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.8+.4,s:Math.random()*1.8+.4,a:Math.random()}));}
@@ -40,6 +40,7 @@ function start(){ship={x:358,y:440,w:44,h:40,spd:6.5,cd:0};lasers=[];rocks=[];sp
 document.addEventListener("keydown",e=>{keys[e.code]=true;if(e.code==="Space"&&run)e.preventDefault();if(e.key.length===1&&run){sec=(sec+e.key.toLowerCase()).slice(-4);if(sec==="slow"){slow=!slow;bdg.textContent=slow?"[SLOW-MO]":"";}}});
 document.addEventListener("keyup",e=>{keys[e.code]=false;});
 function boom(x,y,col){for(let i=0;i<14;i++){const a=Math.random()*Math.PI*2,v=Math.random()*4+1;sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:24,col});}}
+function vaporizeRocks(){rocks.forEach(rk=>boom(rk.x,rk.y,"#fb923c"));rocks=[];}
 function hurt(direct=false){if(direct&&shield){shield=false;boom(ship.x+22,ship.y+20,"#2dd4bf");pops.push({x:ship.x+22,y:ship.y,t:"BLOCKED!",life:32,c:"#2dd4bf"});sfx(300,"sawtooth",0.2,0.1);return;}lives--;lvE.textContent=lives;shake=10;if(lives<=0){run=false;if(score>best){best=score;localStorage.setItem("tesca-hi",best);hiE.textContent=best;}ot.textContent="Game Over!";sub.textContent="Final Score: "+score+" | Best: "+best;ov.style.display="block";}}
 function loop(){if(!run)return;ctx.save();if(shake>0){ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake--;}
 ctx.clearRect(0,0,cv.width,cv.height);const f=slow?0.3:1;
@@ -69,7 +70,7 @@ if(hit)continue;
 if(Math.hypot(ship.x+22-rk.x,ship.y+20-rk.y)<rk.r+16){rocks.splice(i,1);boom(rk.x,rk.y,"#ef4444");hurt();}
 else if(rk.y-rk.r>cv.height){rocks.splice(i,1);hurt(true);}
 }
-if(!boss&&score>=nextBoss){const hp=24+Math.floor(score/500)*8;rocks=[];boss={x:380,y:82,r:54,vx:2.4,hp:hp,maxHp:hp,cd:45};nextBoss+=500;pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});sfx(220,"sawtooth",0.3,0.1);}
+if(!boss&&score>=nextBoss){const hp=24+Math.floor(score/500)*8;rocks=[];vaporizeRocks();boss={x:380,y:82,r:54,vx:2.4,hp:hp,maxHp:hp,cd:45};nextBoss+=500;pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});sfx(220,"sawtooth",0.3,0.1);}
 if(boss){
   boss.x+=boss.vx*(slow?0.5:1);if(boss.x<65||boss.x>cv.width-65)boss.vx*=-1;
   boss.cd--;if(boss.cd<=0){bossShots.push({x:boss.x-18,y:boss.y+24},{x:boss.x+18,y:boss.y+24});boss.cd=slow?75:45;}
@@ -157,6 +158,7 @@ cv.addEventListener("touchstart", moveShipToTouch, { passive: false });
 cv.addEventListener("touchmove", moveShipToTouch, { passive: false });
 cv.addEventListener("touchend", () => { keys["Space"] = false; });
 </script></body></html>"""
+
 
 
 
