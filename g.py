@@ -31,7 +31,7 @@ const cv=document.getElementById("cv"),ctx=cv.getContext("2d"),scE=document.getE
 const actx=new (window.AudioContext||window.webkitAudioContext)();
 function sfx(f,t,d,v){try{if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.setValueAtTime(f,actx.currentTime);o.frequency.exponentialRampToValueAtTime(f*0.35,actx.currentTime+d);g.gain.setValueAtTime(v,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+d);}catch(e){}}
 let powers=[],triple=0,shield=false,boss=null,bossShots=[],nextBoss=500,pops=[];
-window.addEventListener("keydown",e=>{if(typeof run!=="undefined"&&run){if(e.key.toLowerCase()==="h"){shield=!shield;sfx(600,"sine",0.12,0.08);}if(e.key.toLowerCase()==="b"&&!boss){boss={x:380,y:65,r:44,vx:2.4,hp:24,maxHp:24,cd:45};pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});}}});
+window.addEventListener("keydown",e=>{if(typeof run!=="undefined"&&run){if(e.key.toLowerCase()==="h"){shield=!shield;sfx(600,"sine",0.12,0.08);}if(e.key.toLowerCase()==="b"&&!boss){boss={x:380,y:65,r:54,vx:2.4,hp:24,maxHp:24,cd:45};pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});}}});
 let ship,lasers,rocks,sparks,stars,score,best=+(localStorage.getItem("tesca-hi")||0),lives,run=false,keys={},sec="",slow=false,shake=0;
 hiE.textContent=best;
 function initStars(){stars=Array.from({length:80},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.8+.4,s:Math.random()*1.8+.4,a:Math.random()}));}
@@ -69,15 +69,34 @@ if(hit)continue;
 if(Math.hypot(ship.x+22-rk.x,ship.y+20-rk.y)<rk.r+16){rocks.splice(i,1);boom(rk.x,rk.y,"#ef4444");hurt();}
 else if(rk.y-rk.r>cv.height){rocks.splice(i,1);hurt(true);}
 }
-if(!boss&&score>=nextBoss){const hp=24+Math.floor(score/500)*8;boss={x:380,y:65,r:44,vx:2.4,hp:hp,maxHp:hp,cd:45};nextBoss+=500;pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});sfx(220,"sawtooth",0.3,0.1);}
+if(!boss&&score>=nextBoss){const hp=24+Math.floor(score/500)*8;boss={x:380,y:65,r:54,vx:2.4,hp:hp,maxHp:hp,cd:45};nextBoss+=500;pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});sfx(220,"sawtooth",0.3,0.1);}
 if(boss){
   boss.x+=boss.vx*(slow?0.5:1);if(boss.x<65||boss.x>cv.width-65)boss.vx*=-1;
   boss.cd--;if(boss.cd<=0){bossShots.push({x:boss.x-18,y:boss.y+24},{x:boss.x+18,y:boss.y+24});boss.cd=slow?75:45;}
   ctx.save();ctx.translate(boss.x,boss.y);
-  ctx.fillStyle="#7c3aed";ctx.beginPath();ctx.ellipse(0,0,boss.r,22,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#38bdf8";ctx.beginPath();ctx.arc(0,-8,18,Math.PI,0);ctx.fill();
-  ctx.fillStyle="#1e293b";ctx.fillRect(-45,-38,90,7);
-  ctx.fillStyle="#f43f5e";ctx.fillRect(-45,-38,90*(boss.hp/boss.maxHp),7);
+  // Twin rear plasma thrusters
+  const fl=6+Math.random()*6;
+  ctx.fillStyle="#38bdf8";ctx.beginPath();ctx.moveTo(-14,-24);ctx.lineTo(-8,-24);ctx.lineTo(-11,-24-fl);ctx.fill();
+  ctx.beginPath();ctx.moveTo(8,-24);ctx.lineTo(14,-24);ctx.lineTo(11,-24-fl);ctx.fill();
+  // Outer swept crimson sickle wings
+  const wg=ctx.createLinearGradient(0,-25,0,32);wg.addColorStop(0,"#7f1d1d");wg.addColorStop(0.5,"#dc2626");wg.addColorStop(1,"#450a0a");
+  ctx.fillStyle=wg;ctx.strokeStyle="#fca5a5";ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.moveTo(-22,-10);ctx.quadraticCurveTo(-56,-22,-54,28);ctx.quadraticCurveTo(-42,12,-24,14);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(22,-10);ctx.quadraticCurveTo(56,-22,54,28);ctx.quadraticCurveTo(42,12,24,14);ctx.closePath();ctx.fill();ctx.stroke();
+  // Gunmetal armor struts & wingtip laser pods
+  ctx.fillStyle="#1e293b";ctx.fillRect(-42,4,8,14);ctx.fillRect(34,4,8,14);
+  ctx.fillStyle="#f43f5e";ctx.beginPath();ctx.arc(-38,18,3,0,Math.PI*2);ctx.arc(38,18,3,0,Math.PI*2);ctx.fill();
+  // Central armored fuselage
+  const hg=ctx.createLinearGradient(-22,-26,22,34);hg.addColorStop(0,"#334155");hg.addColorStop(0.5,"#b91c1c");hg.addColorStop(1,"#1e293b");
+  ctx.fillStyle=hg;ctx.beginPath();ctx.moveTo(0,36);ctx.lineTo(22,12);ctx.lineTo(18,-24);ctx.lineTo(0,-16);ctx.lineTo(-18,-24);ctx.lineTo(-22,12);ctx.closePath();ctx.fill();ctx.stroke();
+  // Dark metallic core plate & glowing crimson bridge visor
+  ctx.fillStyle="#0f172a";ctx.fillRect(-10,-6,20,18);
+  ctx.fillStyle="#ef4444";ctx.shadowColor="#ef4444";ctx.shadowBlur=8;
+  ctx.beginPath();ctx.moveTo(-7,16);ctx.lineTo(7,16);ctx.lineTo(0,26);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+  // Armored Boss HP Bar
+  ctx.fillStyle="rgba(15,23,42,.9)";ctx.fillRect(-52,-42,104,8);
+  ctx.strokeStyle="#475569";ctx.lineWidth=1;ctx.strokeRect(-52,-42,104,8);
+  ctx.fillStyle="#ef4444";ctx.fillRect(-50,-40,100*(boss.hp/boss.maxHp),4);
   ctx.restore();
   for(let j=lasers.length-1;j>=0;j--){const b=lasers[j];if(Math.hypot(b.x+2-boss.x,b.y-boss.y)<boss.r){lasers.splice(j,1);boss.hp--;sfx(400,"square",0.05,0.05);if(boss.hp<=0){boom(boss.x,boss.y,"#a855f7");pops.push({x:boss.x,y:boss.y,t:"+150 BOSS!",life:45,c:"#a855f7"});sfx(150,"sawtooth",0.4,0.14);score+=150;scE.textContent=score;boss=null;break;}}}
 }
@@ -109,6 +128,7 @@ cv.addEventListener("touchstart", moveShipToTouch, { passive: false });
 cv.addEventListener("touchmove", moveShipToTouch, { passive: false });
 cv.addEventListener("touchend", () => { keys["Space"] = false; });
 </script></body></html>"""
+
 
 
 
