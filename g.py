@@ -31,7 +31,7 @@ const cv=document.getElementById("cv"),ctx=cv.getContext("2d"),scE=document.getE
 const actx=new (window.AudioContext||window.webkitAudioContext)();
 function sfx(f,t,d,v){try{if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.setValueAtTime(f,actx.currentTime);o.frequency.exponentialRampToValueAtTime(f*0.35,actx.currentTime+d);g.gain.setValueAtTime(v,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+d);}catch(e){}}
 let powers=[],triple=0,shield=false,boss=null,bossShots=[],nextBoss=500,pops=[];
-window.addEventListener("keydown",e=>{if(typeof run!=="undefined"&&run){if(e.key.toLowerCase()==="h"){shield=!shield;sfx(600,"sine",0.12,0.08);}if(e.key.toLowerCase()==="b"&&!boss){rocks=[];boss={x:380,y:65,r:54,vx:2.4,hp:24,maxHp:24,cd:45};pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});}}});
+window.addEventListener("keydown",e=>{if(typeof run!=="undefined"&&run){if(e.key.toLowerCase()==="h"){shield=!shield;sfx(600,"sine",0.12,0.08);}if(e.key.toLowerCase()==="b"&&!boss){rocks=[];boss={x:380,y:82,r:54,vx:2.4,hp:24,maxHp:24,cd:45};pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});}}});
 let ship,lasers,rocks,sparks,stars,score,best=+(localStorage.getItem("tesca-hi")||0),lives,run=false,keys={},sec="",slow=false,shake=0;
 hiE.textContent=best;
 function initStars(){stars=Array.from({length:80},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.8+.4,s:Math.random()*1.8+.4,a:Math.random()}));}
@@ -69,62 +69,63 @@ if(hit)continue;
 if(Math.hypot(ship.x+22-rk.x,ship.y+20-rk.y)<rk.r+16){rocks.splice(i,1);boom(rk.x,rk.y,"#ef4444");hurt();}
 else if(rk.y-rk.r>cv.height){rocks.splice(i,1);hurt(true);}
 }
-if(!boss&&score>=nextBoss){const hp=24+Math.floor(score/500)*8;rocks=[];boss={x:380,y:65,r:54,vx:2.4,hp:hp,maxHp:hp,cd:45};nextBoss+=500;pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});sfx(220,"sawtooth",0.3,0.1);}
+if(!boss&&score>=nextBoss){const hp=24+Math.floor(score/500)*8;rocks=[];boss={x:380,y:82,r:54,vx:2.4,hp:hp,maxHp:hp,cd:45};nextBoss+=500;pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});sfx(220,"sawtooth",0.3,0.1);}
 if(boss){
   boss.x+=boss.vx*(slow?0.5:1);if(boss.x<65||boss.x>cv.width-65)boss.vx*=-1;
   boss.cd--;if(boss.cd<=0){bossShots.push({x:boss.x-18,y:boss.y+24},{x:boss.x+18,y:boss.y+24});boss.cd=slow?75:45;}
-      ctx.save();ctx.translate(boss.x,boss.y);
-  // 3D ambient drop shadow & red engine aura
-  ctx.shadowColor="rgba(220,38,38,0.45)";ctx.shadowBlur=18;ctx.shadowOffsetY=10;
-  // Twin rear blue ion exhaust plumes
-  const fl=10+Math.random()*9;
-  const eg=ctx.createLinearGradient(0,-24,0,-24-fl);eg.addColorStop(0,"#e0f2fe");eg.addColorStop(0.4,"#0284c7");eg.addColorStop(1,"transparent");
-  ctx.fillStyle=eg;
-  ctx.beginPath();ctx.moveTo(-16,-22);ctx.lineTo(-7,-22);ctx.lineTo(-11.5,-22-fl);ctx.fill();
-  ctx.beginPath();ctx.moveTo(7,-22);ctx.lineTo(16,-22);ctx.lineTo(11.5,-22-fl);ctx.fill();
-  ctx.shadowOffsetY=0;ctx.shadowBlur=0;
+        ctx.save();ctx.translate(boss.x,boss.y);
+  // Twin rear blue thruster flames behind the upper horns
+  const fl=10+Math.random()*8;
+  ctx.fillStyle="#38bdf8";
+  ctx.beginPath();ctx.moveTo(-12,-34);ctx.lineTo(-6,-34);ctx.lineTo(-9,-34-fl);ctx.fill();
+  ctx.beginPath();ctx.moveTo(6,-34);ctx.lineTo(12,-34);ctx.lineTo(9,-34-fl);ctx.fill();
 
-  // Outer swept crimson sickle wings with 3D cylindrical gradient
-  const wgL=ctx.createLinearGradient(-58,0,-18,0);wgL.addColorStop(0,"#450a0a");wgL.addColorStop(0.35,"#ef4444");wgL.addColorStop(0.7,"#991b1b");wgL.addColorStop(1,"#1e293b");
-  const wgR=ctx.createLinearGradient(58,0,18,0);wgR.addColorStop(0,"#450a0a");wgR.addColorStop(0.35,"#ef4444");wgR.addColorStop(0.7,"#991b1b");wgR.addColorStop(1,"#1e293b");
-  ctx.fillStyle=wgL;ctx.beginPath();ctx.moveTo(-20,-12);ctx.quadraticCurveTo(-60,-26,-56,30);ctx.quadraticCurveTo(-43,10,-22,15);ctx.closePath();ctx.fill();
-  ctx.fillStyle=wgR;ctx.beginPath();ctx.moveTo(20,-12);ctx.quadraticCurveTo(60,-26,56,30);ctx.quadraticCurveTo(43,10,22,15);ctx.closePath();ctx.fill();
-  // Specular metallic bevel edge on sickle blades
-  ctx.strokeStyle="#fca5a5";ctx.lineWidth=1.4;
-  ctx.beginPath();ctx.moveTo(-22,-11);ctx.quadraticCurveTo(-58,-24,-55,28);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(22,-11);ctx.quadraticCurveTo(58,-24,55,28);ctx.stroke();
+  // 1. Upper twin red crescent horns & central engine block
+  ctx.fillStyle="#27272a";ctx.fillRect(-7,-42,14,16);
+  const hornG=ctx.createLinearGradient(0,-54,0,-20);hornG.addColorStop(0,"#dc2626");hornG.addColorStop(1,"#7f1d1d");
+  ctx.fillStyle=hornG;ctx.strokeStyle="#18181b";ctx.lineWidth=1.2;
+  // Left upper horn
+  ctx.beginPath();ctx.moveTo(-7,-32);ctx.quadraticCurveTo(-20,-34,-21,-54);ctx.quadraticCurveTo(-27,-34,-21,-18);ctx.lineTo(-7,-20);ctx.closePath();ctx.fill();ctx.stroke();
+  // Right upper horn
+  ctx.beginPath();ctx.moveTo(7,-32);ctx.quadraticCurveTo(20,-34,21,-54);ctx.quadraticCurveTo(27,-34,21,-18);ctx.lineTo(7,-20);ctx.closePath();ctx.fill();ctx.stroke();
 
-  // Gunmetal armored wing pylons & glowing plasma cannon barrels
-  const pg=ctx.createLinearGradient(-46,0,-32,0);pg.addColorStop(0,"#0f172a");pg.addColorStop(0.5,"#64748b");pg.addColorStop(1,"#0f172a");
-  ctx.fillStyle=pg;ctx.fillRect(-44,2,10,18);
-  const pg2=ctx.createLinearGradient(32,0,46,0);pg2.addColorStop(0,"#0f172a");pg2.addColorStop(0.5,"#64748b");pg2.addColorStop(1,"#0f172a");
-  ctx.fillStyle=pg2;ctx.fillRect(34,2,10,18);
-  ctx.fillStyle="#f43f5e";ctx.shadowColor="#f43f5e";ctx.shadowBlur=10;
-  ctx.beginPath();ctx.arc(-39,21,3.5,0,Math.PI*2);ctx.arc(39,21,3.5,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+  // 2. Large swept outer sickle wings (gunmetal bridges + crimson crescent blades)
+  // Gunmetal wing arms
+  ctx.fillStyle="#292524";ctx.strokeStyle="#09090b";
+  ctx.beginPath();ctx.moveTo(-22,-6);ctx.quadraticCurveTo(-38,-2,-46,-16);ctx.lineTo(-46,4);ctx.quadraticCurveTo(-36,8,-22,12);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(22,-6);ctx.quadraticCurveTo(38,-2,46,-16);ctx.lineTo(46,4);ctx.quadraticCurveTo(36,8,22,12);ctx.closePath();ctx.fill();ctx.stroke();
+  // Under-wing twin gun barrels
+  ctx.fillStyle="#52525b";ctx.fillRect(-36,6,4,10);ctx.fillRect(32,6,4,10);
+  // Outer crimson crescent blades (top & bottom tips)
+  const bladeG=ctx.createLinearGradient(0,-34,0,38);bladeG.addColorStop(0,"#ef4444");bladeG.addColorStop(0.5,"#991b1b");bladeG.addColorStop(1,"#dc2626");
+  ctx.fillStyle=bladeG;
+  // Left crescent blade
+  ctx.beginPath();ctx.moveTo(-45,-34);ctx.quadraticCurveTo(-58,-4,-41,38);ctx.quadraticCurveTo(-48,6,-44,-14);ctx.closePath();ctx.fill();ctx.stroke();
+  // Right crescent blade
+  ctx.beginPath();ctx.moveTo(45,-34);ctx.quadraticCurveTo(58,-4,41,38);ctx.quadraticCurveTo(48,6,44,-14);ctx.closePath();ctx.fill();ctx.stroke();
 
-  // Main 3D beveled fuselage hull (left-to-right metallic specular lighting)
-  const hg=ctx.createLinearGradient(-24,0,24,0);
-  hg.addColorStop(0,"#1e293b");hg.addColorStop(0.25,"#991b1b");hg.addColorStop(0.5,"#f87171");hg.addColorStop(0.75,"#7f1d1d");hg.addColorStop(1,"#0f172a");
-  ctx.fillStyle=hg;
-  ctx.beginPath();ctx.moveTo(0,38);ctx.lineTo(24,12);ctx.lineTo(20,-24);ctx.lineTo(0,-15);ctx.lineTo(-20,-24);ctx.lineTo(-24,12);ctx.closePath();ctx.fill();
-  ctx.strokeStyle="#cbd5e1";ctx.lineWidth=1;ctx.stroke();
+  // 3. Inner dark-olive/gunmetal wing pods flanking the hull
+  ctx.fillStyle="#292524";
+  ctx.beginPath();ctx.moveTo(-18,-18);ctx.lineTo(-28,-14);ctx.lineTo(-28,22);ctx.lineTo(-18,34);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(18,-18);ctx.lineTo(28,-14);ctx.lineTo(28,22);ctx.lineTo(18,34);ctx.closePath();ctx.fill();ctx.stroke();
 
-  // Raised 3D gunmetal armor spine & vents
-  const sp=ctx.createLinearGradient(-11,0,11,0);sp.addColorStop(0,"#0f172a");sp.addColorStop(0.5,"#475569");sp.addColorStop(1,"#0f172a");
-  ctx.fillStyle=sp;ctx.beginPath();ctx.moveTo(0,18);ctx.lineTo(11,4);ctx.lineTo(9,-14);ctx.lineTo(-9,-14);ctx.lineTo(-11,4);ctx.closePath();ctx.fill();
-  ctx.strokeStyle="#94a3b8";ctx.lineWidth=0.8;ctx.stroke();
+  // 4. Main crimson oval-tapered central fuselage
+  const bodyG=ctx.createLinearGradient(-18,0,18,0);bodyG.addColorStop(0,"#7f1d1d");bodyG.addColorStop(0.5,"#dc2626");bodyG.addColorStop(1,"#7f1d1d");
+  ctx.fillStyle=bodyG;
+  ctx.beginPath();ctx.moveTo(0,-28);ctx.quadraticCurveTo(22,-10,16,32);ctx.lineTo(0,56);ctx.lineTo(-16,32);ctx.quadraticCurveTo(-22,-10,0,-28);ctx.closePath();ctx.fill();ctx.stroke();
 
-  // Glowing 3D command core & crimson laser visor
-  ctx.fillStyle="#ef4444";ctx.shadowColor="#ef4444";ctx.shadowBlur=12;
-  ctx.beginPath();ctx.moveTo(-7,19);ctx.lineTo(7,19);ctx.lineTo(0,30);ctx.closePath();ctx.fill();
-  ctx.fillStyle="#fecaca";ctx.beginPath();ctx.arc(0,22,2.2,0,Math.PI*2);ctx.fill();
-  ctx.shadowBlur=0;
+  // 5. Central gunmetal armored cockpit deck & glowing crimson core
+  ctx.fillStyle="#3f3f46";ctx.fillRect(-9,-4,18,22);
+  ctx.fillStyle="#18181b";ctx.fillRect(-5,-18,10,14);
+  ctx.fillStyle="#ef4444";ctx.shadowColor="#ef4444";ctx.shadowBlur=8;
+  ctx.beginPath();ctx.moveTo(-6,22);ctx.lineTo(6,22);ctx.lineTo(0,32);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+  // Twin nose laser tips
+  ctx.fillStyle="#b91c1c";ctx.fillRect(-10,42,3,10);ctx.fillRect(7,42,3,10);
 
-  // Metallic Boss HP Bar
-  ctx.fillStyle="rgba(2,6,23,.9)";ctx.fillRect(-54,-44,108,9);
-  ctx.strokeStyle="#64748b";ctx.lineWidth=1;ctx.strokeRect(-54,-44,108,9);
-  const hpg=ctx.createLinearGradient(-52,0,52,0);hpg.addColorStop(0,"#dc2626");hpg.addColorStop(1,"#f87171");
-  ctx.fillStyle=hpg;ctx.fillRect(-52,-42,104*(boss.hp/boss.maxHp),5);
+  // 6. Boss HP Bar above the upper horns
+  ctx.fillStyle="rgba(2,6,23,.9)";ctx.fillRect(-54,-66,108,8);
+  ctx.strokeStyle="#64748b";ctx.lineWidth=1;ctx.strokeRect(-54,-66,108,8);
+  ctx.fillStyle="#ef4444";ctx.fillRect(-52,-64,104*(boss.hp/boss.maxHp),4);
   ctx.restore();
   for(let j=lasers.length-1;j>=0;j--){const b=lasers[j];if(Math.hypot(b.x+2-boss.x,b.y-boss.y)<boss.r){lasers.splice(j,1);boss.hp--;sfx(400,"square",0.05,0.05);if(boss.hp<=0){boom(boss.x,boss.y,"#a855f7");pops.push({x:boss.x,y:boss.y,t:"+150 BOSS!",life:45,c:"#a855f7"});sfx(150,"sawtooth",0.4,0.14);score+=150;scE.textContent=score;boss=null;break;}}}
 }
@@ -156,6 +157,7 @@ cv.addEventListener("touchstart", moveShipToTouch, { passive: false });
 cv.addEventListener("touchmove", moveShipToTouch, { passive: false });
 cv.addEventListener("touchend", () => { keys["Space"] = false; });
 </script></body></html>"""
+
 
 
 
