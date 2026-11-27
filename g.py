@@ -31,6 +31,7 @@ const cv=document.getElementById("cv"),ctx=cv.getContext("2d"),scE=document.getE
 const actx=new (window.AudioContext||window.webkitAudioContext)();
 function sfx(f,t,d,v){try{if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.setValueAtTime(f,actx.currentTime);o.frequency.exponentialRampToValueAtTime(f*0.35,actx.currentTime+d);g.gain.setValueAtTime(v,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+d);}catch(e){}}
 let powers=[],triple=0,shield=false,boss=null,bossShots=[],nextBoss=500,pops=[];
+window.addEventListener("keydown",e=>{if(typeof run!=="undefined"&&run){if(e.key.toLowerCase()==="h"){shield=!shield;sfx(600,"sine",0.12,0.08);}if(e.key.toLowerCase()==="b"&&!boss){boss={x:380,y:65,r:44,vx:2.4,hp:24,maxHp:24,cd:45};pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});}}});
 let ship,lasers,rocks,sparks,stars,score,best=+(localStorage.getItem("tesca-hi")||0),lives,run=false,keys={},sec="",slow=false,shake=0;
 hiE.textContent=best;
 function initStars(){stars=Array.from({length:80},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.8+.4,s:Math.random()*1.8+.4,a:Math.random()}));}
@@ -108,6 +109,7 @@ cv.addEventListener("touchstart", moveShipToTouch, { passive: false });
 cv.addEventListener("touchmove", moveShipToTouch, { passive: false });
 cv.addEventListener("touchend", () => { keys["Space"] = false; });
 </script></body></html>"""
+
 
 
 
