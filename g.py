@@ -25,13 +25,29 @@ canvas{touch-action:none;background:radial-gradient(circle at 50% 40%,#0f1e45 0%
 <div class="box"><h3>Controls</h3><ul><li><strong>Move Left:</strong> Left Arrow or <strong>A</strong></li><li><strong>Move Right:</strong> Right Arrow or <strong>D</strong></li><li><strong>Fire Lasers:</strong> <strong>Spacebar</strong></li></ul></div>
 <div class="box"><h3>Rules and Scoring</h3><ul><li><strong>Objective:</strong> Blast incoming meteors before they hit your ship or reach the bottom.</li><li><strong>Scoring:</strong> +10 points per meteor. Speed increases as your score climbs.</li><li><strong>Lives:</strong> Start with 3 lives. Lose 1 if hit or a meteor slips past.</li></ul></div>
 <p class="tip">Tip: Click inside the dark game window if keys do not respond right away.</p>
-<button class="go" onclick="start()">Launch Ship</button></div><div id="bwWin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:50;align-items:center;justify-content:center;padding:20px"><div style="background:#ffffff;color:#000000;border:4px solid #000000;border-radius:16px;padding:32px 28px;max-width:420px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(255,255,255,0.25)"><h2 style="font-size:1.75rem;font-weight:900;margin-bottom:22px;letter-spacing:0.5px">Congrads You Beat the Boss !!</h2><button type="button" onclick="resumeGame()" style="background:#000000;color:#ffffff;border:2px solid #000000;padding:12px 28px;border-radius:24px;font-size:1.05rem;font-weight:700;cursor:pointer">Continue Playing</button></div></div>
+<button class="go" onclick="start()">Launch Ship</button></div><style>
+@keyframes bwPop{0%{opacity:0;transform:scale(0.82) translateY(14px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+.bw-card{background:#ffffff;color:#000000;border:4px solid #000000;outline:3px solid #ffffff;border-radius:20px;padding:34px 28px;max-width:440px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.9),0 0 0 8px #000000;animation:bwPop 0.32s cubic-bezier(0.16,1,0.3,1)}
+.bw-badge{display:inline-block;background:#000000;color:#ffffff;font-size:0.75rem;font-weight:800;letter-spacing:2px;padding:5px 14px;border-radius:999px;text-transform:uppercase;margin-bottom:14px}
+.bw-btn{background:#000000;color:#ffffff;border:2px solid #000000;padding:14px 32px;border-radius:999px;font-size:1.05rem;font-weight:800;cursor:pointer;width:100%;transition:all 0.18s ease;letter-spacing:0.5px}
+.bw-btn:hover{background:#ffffff;color:#000000;transform:translateY(-2px);box-shadow:0 6px 0 #000000}
+</style>
+<div id="bwWin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(6px);z-index:50;align-items:center;justify-content:center;padding:20px">
+  <div class="bw-card">
+    <div class="bw-badge">&#9733; Sector Cleared &#9733;</div>
+    <div style="font-size:3rem;line-height:1;margin-bottom:10px;filter:grayscale(100%)">&#127942;</div>
+    <h2 style="font-size:1.85rem;font-weight:900;line-height:1.2;margin-bottom:10px;letter-spacing:-0.5px">Congrads You Beat the Boss !!</h2>
+    <p style="font-size:0.95rem;font-weight:600;color:#333333;margin-bottom:22px;padding:8px 12px;background:#f2f2f2;border:1.5px dashed #000000;border-radius:10px">Boss Bonus: <strong>+150 PTS</strong> &bull; Total Score: <strong id="bwScore">0</strong></p>
+    <button type="button" class="bw-btn" onclick="resumeGame()">Continue Playing &#9654;</button>
+    <div style="font-size:0.76rem;color:#555555;margin-top:10px;font-weight:600">Press ENTER to continue</div>
+  </div>
+</div>
 <script>
 const cv=document.getElementById("cv"),ctx=cv.getContext("2d"),scE=document.getElementById("sc"),hiE=document.getElementById("hi"),lvE=document.getElementById("lv"),bdg=document.getElementById("bdg"),ov=document.getElementById("ov"),ot=document.getElementById("ot"),sub=document.getElementById("sub");
 const actx=new (window.AudioContext||window.webkitAudioContext)();
 function sfx(f,t,d,v){try{if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.setValueAtTime(f,actx.currentTime);o.frequency.exponentialRampToValueAtTime(f*0.35,actx.currentTime+d);g.gain.setValueAtTime(v,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+d);}catch(e){}}
 let powers=[],triple=0,shield=false,boss=null,bossShots=[],nextBoss=500,pops=[];
-window.addEventListener("keydown",e=>{if(typeof run!=="undefined"&&run){if(e.key.toLowerCase()==="h"){shield=!shield;sfx(600,"sine",0.12,0.08);}if(e.key.toLowerCase()==="b"&&!boss){vaporizeRocks();boss={x:380,y:82,r:54,vx:2.4,hp:24,maxHp:24,cd:45};pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});}}});
+window.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.getElementById("bwWin").style.display==="flex"){e.preventDefault();resumeGame();return;}if(typeof run!=="undefined"&&run){if(e.key.toLowerCase()==="h"){shield=!shield;sfx(600,"sine",0.12,0.08);}if(e.key.toLowerCase()==="b"&&!boss){vaporizeRocks();boss={x:380,y:82,r:54,vx:2.4,hp:24,maxHp:24,cd:45};pops.push({x:380,y:120,t:"BOSS INCOMING!",life:50,c:"#f43f5e"});}}});
 let ship,lasers,rocks,sparks,stars,score,best=+(localStorage.getItem("tesca-hi")||0),lives,run=false,keys={},sec="",slow=false,shake=0;
 hiE.textContent=best;
 function initStars(){stars=Array.from({length:80},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.8+.4,s:Math.random()*1.8+.4,a:Math.random()}));}
@@ -147,7 +163,7 @@ if(boss){
   const hpG=ctx.createLinearGradient(-54,0,54,0);hpG.addColorStop(0,"#dc2626");hpG.addColorStop(1,"#fca5a5");
   ctx.fillStyle=hpG;ctx.fillRect(-54,-68,108*(boss.hp/boss.maxHp),5);
   ctx.restore();
-  for(let j=lasers.length-1;j>=0;j--){const b=lasers[j];if(Math.hypot(b.x+2-boss.x,b.y-boss.y)<boss.r){lasers.splice(j,1);boss.hp--;boss.flash=3;sfx(400,"square",0.05,0.05);if(boss.hp<=0){boom(boss.x,boss.y,"#a855f7");pops.push({x:boss.x,y:boss.y,t:"+150 BOSS!",life:45,c:"#a855f7"});sfx(150,"sawtooth",0.4,0.14);score+=150;scE.textContent=score;boss=null;bossShots=[];run=false;keys={};document.getElementById("bwWin").style.display="flex";break;}}}
+  for(let j=lasers.length-1;j>=0;j--){const b=lasers[j];if(Math.hypot(b.x+2-boss.x,b.y-boss.y)<boss.r){lasers.splice(j,1);boss.hp--;boss.flash=3;sfx(400,"square",0.05,0.05);if(boss.hp<=0){boom(boss.x,boss.y,"#a855f7");pops.push({x:boss.x,y:boss.y,t:"+150 BOSS!",life:45,c:"#a855f7"});sfx(150,"sawtooth",0.4,0.14);score+=150;scE.textContent=score;boss=null;bossShots=[];run=false;keys={};document.getElementById("bwScore").textContent=score;document.getElementById("bwWin").style.display="flex";sfx(523,"triangle",0.12,0.12);setTimeout(()=>sfx(659,"triangle",0.12,0.12),110);setTimeout(()=>sfx(784,"triangle",0.25,0.14),220);break;}}}
 }
 for(let i=bossShots.length-1;i>=0;i--){const s=bossShots[i];s.y+=4.8*(slow?0.5:1);ctx.fillStyle="#f43f5e";ctx.beginPath();ctx.arc(s.x,s.y,5,0,Math.PI*2);ctx.fill();if(Math.hypot(s.x-(ship.x+22),s.y-(ship.y+20))<22){bossShots.splice(i,1);hurt(true);}else if(s.y>cv.height+15)bossShots.splice(i,1);}
 for(let i=pops.length-1;i>=0;i--){const p=pops[i];p.y-=0.9;p.life--;ctx.save();ctx.globalAlpha=Math.max(0,p.life/30);ctx.fillStyle=p.c;ctx.font="bold 13px Arial";ctx.textAlign="center";ctx.fillText(p.t,p.x,p.y);ctx.restore();if(p.life<=0)pops.splice(i,1);}for(let i=powers.length-1;i>=0;i--){const w=powers[i];w.y+=2.2;ctx.fillStyle=w.t==="triple"?"#38bdf8":(w.t==="shield"?"#2dd4bf":"#f43f5e");ctx.beginPath();ctx.arc(w.x,w.y,11,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.font="bold 11px Arial";ctx.textAlign="center";ctx.fillText(w.t==="triple"?"3X":(w.t==="shield"?"S":"+1"),w.x,w.y+4);if(Math.hypot(ship.x+22-w.x,ship.y+20-w.y)<28){sfx(880,"sine",0.18,0.1);if(w.t==="triple")triple=35;else if(w.t==="shield")shield=true;else{lives++;lvE.textContent=lives;}powers.splice(i,1);}else if(w.y>cv.height+20)powers.splice(i,1);}for(let i=sparks.length-1;i>=0;i--){const p=sparks[i];p.x+=p.vx;p.y+=p.vy;p.life--;ctx.globalAlpha=p.life/24;ctx.fillStyle=p.col;ctx.fillRect(p.x,p.y,3,3);if(p.life<=0)sparks.splice(i,1);}
@@ -177,6 +193,7 @@ cv.addEventListener("touchstart", moveShipToTouch, { passive: false });
 cv.addEventListener("touchmove", moveShipToTouch, { passive: false });
 cv.addEventListener("touchend", () => { keys["Space"] = false; });
 </script></body></html>"""
+
 
 
 
