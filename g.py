@@ -25,7 +25,7 @@ canvas{touch-action:none;background:radial-gradient(circle at 50% 40%,#0f1e45 0%
 <div class="box"><h3>Controls</h3><ul><li><strong>Move Left:</strong> Left Arrow or <strong>A</strong></li><li><strong>Move Right:</strong> Right Arrow or <strong>D</strong></li><li><strong>Fire Lasers:</strong> <strong>Spacebar</strong></li></ul></div>
 <div class="box"><h3>Rules and Scoring</h3><ul><li><strong>Objective:</strong> Blast incoming meteors before they hit your ship or reach the bottom.</li><li><strong>Scoring:</strong> +10 points per meteor. Speed increases as your score climbs.</li><li><strong>Lives:</strong> Start with 3 lives. Lose 1 if hit or a meteor slips past.</li></ul></div>
 <p class="tip">Tip: Click inside the dark game window if keys do not respond right away.</p>
-<button class="go" onclick="start()">Launch Ship</button></div>
+<button class="go" onclick="start()">Launch Ship</button></div><div id="bwWin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:50;align-items:center;justify-content:center;padding:20px"><div style="background:#ffffff;color:#000000;border:4px solid #000000;border-radius:16px;padding:32px 28px;max-width:420px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(255,255,255,0.25)"><h2 style="font-size:1.75rem;font-weight:900;margin-bottom:22px;letter-spacing:0.5px">Congrads You Beat the Boss !!</h2><button type="button" onclick="resumeGame()" style="background:#000000;color:#ffffff;border:2px solid #000000;padding:12px 28px;border-radius:24px;font-size:1.05rem;font-weight:700;cursor:pointer">Continue Playing</button></div></div>
 <script>
 const cv=document.getElementById("cv"),ctx=cv.getContext("2d"),scE=document.getElementById("sc"),hiE=document.getElementById("hi"),lvE=document.getElementById("lv"),bdg=document.getElementById("bdg"),ov=document.getElementById("ov"),ot=document.getElementById("ot"),sub=document.getElementById("sub");
 const actx=new (window.AudioContext||window.webkitAudioContext)();
@@ -36,7 +36,7 @@ let ship,lasers,rocks,sparks,stars,score,best=+(localStorage.getItem("tesca-hi")
 hiE.textContent=best;
 function initStars(){stars=Array.from({length:80},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.8+.4,s:Math.random()*1.8+.4,a:Math.random()}));}
 function showHelp(){run=false;ot.textContent="Tesca Space";sub.textContent="How to Play";ov.style.display="block";}
-function start(){ship={x:358,y:440,w:44,h:40,spd:6.5,cd:0};lasers=[];rocks=[];sparks=[];powers=[];triple=0;shield=false;boss=null;bossShots=[];nextBoss=500;pops=[];score=0;lives=3;run=true;slow=false;shake=0;bdg.textContent="";scE.textContent=0;lvE.textContent=3;ov.style.display="none";cv.focus();initStars();requestAnimationFrame(loop);}
+function resumeGame(){document.getElementById("bwWin").style.display="none";run=true;cv.focus();requestAnimationFrame(loop);}function start(){document.getElementById("bwWin").style.display="none";ship={x:358,y:440,w:44,h:40,spd:6.5,cd:0};lasers=[];rocks=[];sparks=[];powers=[];triple=0;shield=false;boss=null;bossShots=[];nextBoss=500;pops=[];score=0;lives=3;run=true;slow=false;shake=0;bdg.textContent="";scE.textContent=0;lvE.textContent=3;ov.style.display="none";cv.focus();initStars();requestAnimationFrame(loop);}
 document.addEventListener("keydown",e=>{keys[e.code]=true;if(e.code==="Space"&&run)e.preventDefault();if(e.key.length===1&&run){sec=(sec+e.key.toLowerCase()).slice(-4);if(sec==="slow"){slow=!slow;bdg.textContent=slow?"[SLOW-MO]":"";}}});
 document.addEventListener("keyup",e=>{keys[e.code]=false;});
 function boom(x,y,col){for(let i=0;i<14;i++){const a=Math.random()*Math.PI*2,v=Math.random()*4+1;sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:24,col});}}
@@ -147,7 +147,7 @@ if(boss){
   const hpG=ctx.createLinearGradient(-54,0,54,0);hpG.addColorStop(0,"#dc2626");hpG.addColorStop(1,"#fca5a5");
   ctx.fillStyle=hpG;ctx.fillRect(-54,-68,108*(boss.hp/boss.maxHp),5);
   ctx.restore();
-  for(let j=lasers.length-1;j>=0;j--){const b=lasers[j];if(Math.hypot(b.x+2-boss.x,b.y-boss.y)<boss.r){lasers.splice(j,1);boss.hp--;boss.flash=3;sfx(400,"square",0.05,0.05);if(boss.hp<=0){boom(boss.x,boss.y,"#a855f7");pops.push({x:boss.x,y:boss.y,t:"+150 BOSS!",life:45,c:"#a855f7"});sfx(150,"sawtooth",0.4,0.14);score+=150;scE.textContent=score;boss=null;break;}}}
+  for(let j=lasers.length-1;j>=0;j--){const b=lasers[j];if(Math.hypot(b.x+2-boss.x,b.y-boss.y)<boss.r){lasers.splice(j,1);boss.hp--;boss.flash=3;sfx(400,"square",0.05,0.05);if(boss.hp<=0){boom(boss.x,boss.y,"#a855f7");pops.push({x:boss.x,y:boss.y,t:"+150 BOSS!",life:45,c:"#a855f7"});sfx(150,"sawtooth",0.4,0.14);score+=150;scE.textContent=score;boss=null;bossShots=[];run=false;keys={};document.getElementById("bwWin").style.display="flex";break;}}}
 }
 for(let i=bossShots.length-1;i>=0;i--){const s=bossShots[i];s.y+=4.8*(slow?0.5:1);ctx.fillStyle="#f43f5e";ctx.beginPath();ctx.arc(s.x,s.y,5,0,Math.PI*2);ctx.fill();if(Math.hypot(s.x-(ship.x+22),s.y-(ship.y+20))<22){bossShots.splice(i,1);hurt(true);}else if(s.y>cv.height+15)bossShots.splice(i,1);}
 for(let i=pops.length-1;i>=0;i--){const p=pops[i];p.y-=0.9;p.life--;ctx.save();ctx.globalAlpha=Math.max(0,p.life/30);ctx.fillStyle=p.c;ctx.font="bold 13px Arial";ctx.textAlign="center";ctx.fillText(p.t,p.x,p.y);ctx.restore();if(p.life<=0)pops.splice(i,1);}for(let i=powers.length-1;i>=0;i--){const w=powers[i];w.y+=2.2;ctx.fillStyle=w.t==="triple"?"#38bdf8":(w.t==="shield"?"#2dd4bf":"#f43f5e");ctx.beginPath();ctx.arc(w.x,w.y,11,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.font="bold 11px Arial";ctx.textAlign="center";ctx.fillText(w.t==="triple"?"3X":(w.t==="shield"?"S":"+1"),w.x,w.y+4);if(Math.hypot(ship.x+22-w.x,ship.y+20-w.y)<28){sfx(880,"sine",0.18,0.1);if(w.t==="triple")triple=35;else if(w.t==="shield")shield=true;else{lives++;lvE.textContent=lives;}powers.splice(i,1);}else if(w.y>cv.height+20)powers.splice(i,1);}for(let i=sparks.length-1;i>=0;i--){const p=sparks[i];p.x+=p.vx;p.y+=p.vy;p.life--;ctx.globalAlpha=p.life/24;ctx.fillStyle=p.col;ctx.fillRect(p.x,p.y,3,3);if(p.life<=0)sparks.splice(i,1);}
@@ -177,6 +177,7 @@ cv.addEventListener("touchstart", moveShipToTouch, { passive: false });
 cv.addEventListener("touchmove", moveShipToTouch, { passive: false });
 cv.addEventListener("touchend", () => { keys["Space"] = false; });
 </script></body></html>"""
+
 
 
 
